@@ -45,6 +45,11 @@ const Index = () => {
         <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
           {t.app.subtitle}
         </p>
+        <div className="pt-4">
+          <Button size="lg" onClick={() => navigate('/login')} className="shadow-lg">
+            Đăng nhập / Sign In
+          </Button>
+        </div>
       </div>
 
       <div className="grid md:grid-cols-3 gap-6">

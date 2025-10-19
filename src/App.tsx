@@ -9,6 +9,7 @@ import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/layout/AppSidebar";
 import { Navbar } from "@/components/layout/Navbar";
 import Index from "./pages/Index";
+import Login from "./pages/Login";
 import Analyze from "./pages/Analyze";
 import Optimize from "./pages/Optimize";
 import History from "./pages/History";
@@ -34,6 +35,7 @@ const App = () => (
                     <div className="max-w-7xl mx-auto">
                       <Routes>
                         <Route path="/" element={<Index />} />
+                        <Route path="/login" element={<Login />} />
                         <Route path="/analyze" element={<Analyze />} />
                         <Route path="/optimize" element={<Optimize />} />
                         {/* <Route path="/history" element={<History />} /> */}

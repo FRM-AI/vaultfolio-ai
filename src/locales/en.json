@@ -57,5 +57,15 @@
     "notifications": "Notifications",
     "emailNotif": "Email notifications",
     "pushNotif": "Push notifications"
+  },
+  "login": {
+    "subtitle": "Sign in to continue",
+    "email": "Email",
+    "emailPlaceholder": "Enter your email",
+    "password": "Password",
+    "passwordPlaceholder": "Enter your password",
+    "loginButton": "Sign In",
+    "noAccount": "Don't have an account?",
+    "registerLink": "Register now"
   }
 }

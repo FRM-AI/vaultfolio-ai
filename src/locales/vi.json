@@ -57,5 +57,15 @@
     "notifications": "Thông báo",
     "emailNotif": "Thông báo email",
     "pushNotif": "Thông báo đẩy"
+  },
+  "login": {
+    "subtitle": "Đăng nhập để tiếp tục",
+    "email": "Email",
+    "emailPlaceholder": "Nhập email của bạn",
+    "password": "Mật khẩu",
+    "passwordPlaceholder": "Nhập mật khẩu",
+    "loginButton": "Đăng nhập",
+    "noAccount": "Chưa có tài khoản?",
+    "registerLink": "Đăng ký ngay"
   }
 }
