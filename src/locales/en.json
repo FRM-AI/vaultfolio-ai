@@ -1,0 +1,61 @@
+{
+  "app": {
+    "title": "FRM-AI",
+    "subtitle": "Smart Investment Advisor",
+    "footer": "Analyze. Invest. Optimize."
+  },
+  "nav": {
+    "analyze": "Analyze",
+    "optimize": "Optimize",
+    "history": "History",
+    "settings": "Settings",
+    "wallet": "Wallet"
+  },
+  "wallet": {
+    "totalValue": "Total Value",
+    "profit": "Profit",
+    "roi": "ROI"
+  },
+  "analyze": {
+    "title": "Stock Analysis",
+    "description": "AI-powered intelligent analysis for precise investment decisions",
+    "searchPlaceholder": "Enter stock code (e.g., VNM, VCB...)",
+    "stockCode": "Code",
+    "price": "Price",
+    "change": "Change",
+    "volume": "Volume",
+    "marketCap": "Market Cap",
+    "pe": "P/E"
+  },
+  "optimize": {
+    "title": "Portfolio Optimization",
+    "description": "AI helps you optimize your portfolio based on risk and goals",
+    "currentPortfolio": "Current Portfolio",
+    "suggestion": "Optimization Suggestion",
+    "riskLevel": "Risk Level",
+    "expectedReturn": "Expected Return"
+  },
+  "history": {
+    "title": "Transaction History",
+    "description": "Track all your transactions and activities",
+    "date": "Date",
+    "type": "Type",
+    "symbol": "Symbol",
+    "quantity": "Quantity",
+    "price": "Price",
+    "total": "Total",
+    "buy": "Buy",
+    "sell": "Sell"
+  },
+  "settings": {
+    "title": "Settings",
+    "description": "Customize your experience",
+    "theme": "Theme",
+    "light": "Light",
+    "dark": "Dark",
+    "language": "Language",
+    "notifications": "Notifications",
+    "emailNotif": "Email notifications",
+    "pushNotif": "Push notifications"
+  }
+}

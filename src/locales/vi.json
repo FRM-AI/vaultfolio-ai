@@ -1,0 +1,61 @@
+{
+  "app": {
+    "title": "FRM-AI",
+    "subtitle": "Cố vấn chứng khoán thông minh",
+    "footer": "Phân tích. Đầu tư. Tối ưu hoá."
+  },
+  "nav": {
+    "analyze": "Phân tích",
+    "optimize": "Tối ưu đầu tư",
+    "history": "Lịch sử",
+    "settings": "Cài đặt",
+    "wallet": "Ví"
+  },
+  "wallet": {
+    "totalValue": "Tổng giá trị",
+    "profit": "Lợi nhuận",
+    "roi": "ROI"
+  },
+  "analyze": {
+    "title": "Phân tích cổ phiếu",
+    "description": "Phân tích thông minh với AI để đưa ra quyết định đầu tư chính xác",
+    "searchPlaceholder": "Nhập mã cổ phiếu (VD: VNM, VCB...)",
+    "stockCode": "Mã CP",
+    "price": "Giá",
+    "change": "Thay đổi",
+    "volume": "Khối lượng",
+    "marketCap": "Vốn hóa",
+    "pe": "P/E"
+  },
+  "optimize": {
+    "title": "Tối ưu danh mục",
+    "description": "AI giúp bạn tối ưu hóa danh mục đầu tư dựa trên rủi ro và mục tiêu",
+    "currentPortfolio": "Danh mục hiện tại",
+    "suggestion": "Gợi ý tối ưu",
+    "riskLevel": "Mức rủi ro",
+    "expectedReturn": "Lợi nhuận kỳ vọng"
+  },
+  "history": {
+    "title": "Lịch sử giao dịch",
+    "description": "Theo dõi tất cả các giao dịch và hoạt động của bạn",
+    "date": "Ngày",
+    "type": "Loại",
+    "symbol": "Mã CP",
+    "quantity": "Số lượng",
+    "price": "Giá",
+    "total": "Tổng",
+    "buy": "Mua",
+    "sell": "Bán"
+  },
+  "settings": {
+    "title": "Cài đặt",
+    "description": "Tùy chỉnh trải nghiệm của bạn",
+    "theme": "Giao diện",
+    "light": "Sáng",
+    "dark": "Tối",
+    "language": "Ngôn ngữ",
+    "notifications": "Thông báo",
+    "emailNotif": "Thông báo email",
+    "pushNotif": "Thông báo đẩy"
+  }
+}
