@@ -12,7 +12,7 @@
     "wallet": "Ví"
   },
   "wallet": {
-    "totalValue": "Tổng giá trị",
+    "totalValue": "Số dư ví",
     "profit": "Lợi nhuận",
     "roi": "ROI"
   },

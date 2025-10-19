@@ -17,7 +17,7 @@ export function WalletInfo() {
           <p className="text-xs text-muted-foreground">{t.wallet.totalValue}</p>
           <p className="text-lg font-bold text-foreground">2,450,000,000 ₫</p>
         </div>
-        
+{/*         
         <div className="flex items-center gap-4">
           <div>
             <p className="text-xs text-muted-foreground">{t.wallet.profit}</p>
@@ -34,7 +34,7 @@ export function WalletInfo() {
               <span className="text-sm font-semibold">+16.4%</span>
             </div>
           </div>
-        </div>
+        </div> */}
       </div>
     </Card>
   );

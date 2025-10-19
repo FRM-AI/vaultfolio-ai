@@ -22,7 +22,7 @@ export function AppSidebar() {
   const items = [
     { title: t.nav.analyze, url: '/analyze', icon: BarChart3 },
     { title: t.nav.optimize, url: '/optimize', icon: LineChart },
-    { title: t.nav.history, url: '/history', icon: History },
+    // { title: t.nav.history, url: '/history', icon: History },
     { title: t.nav.settings, url: '/settings', icon: Settings },
   ];
 
@@ -43,7 +43,7 @@ export function AppSidebar() {
                       className={({ isActive }) =>
                         `flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
                           isActive
-                            ? 'bg-primary text-primary-foreground shadow-md'
+                            ? 'bg-primary text-primary shadow-md'
                             : 'hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
                         }`
                       }

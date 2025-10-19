@@ -12,7 +12,7 @@
     "wallet": "Wallet"
   },
   "wallet": {
-    "totalValue": "Total Value",
+    "totalValue": "Total Token",
     "profit": "Profit",
     "roi": "ROI"
   },
