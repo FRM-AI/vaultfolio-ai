@@ -44,7 +44,7 @@ export function AppSidebar() {
                         `flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
                           isActive
                             ? 'bg-primary text-primary-foreground shadow-md'
-                            : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
+                            : 'hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
                         }`
                       }
                     >
