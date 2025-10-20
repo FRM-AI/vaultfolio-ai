@@ -9,6 +9,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { AnalyzeService } from './Analyze.service';
 import { useRef, useState } from "react";
+import { StockChart } from '@/components/StockChart';
 const mockStocks = [
   { code: 'VNM', name: 'Vinamilk', price: '78,500', change: '+2.3%', positive: true, volume: '1.2M', marketCap: '120T', pe: '18.5' },
   { code: 'VCB', name: 'Vietcombank', price: '92,300', change: '+1.8%', positive: true, volume: '3.5M', marketCap: '450T', pe: '15.2' },
@@ -30,6 +31,7 @@ export default function Analyze() {
     news_analysis: "",
     combined_analysis: "",
   });
+  const [chartData, setChartData] = useState<any>(null);
   const abortRef = useRef<AbortController | null>(null);
   const handleSearch = async () => {
     if (!searchValue.stockCode) return;
@@ -38,6 +40,7 @@ export default function Analyze() {
     setStatus("Đang phân tích...");
     setProgress(0);
     setSections({ technical_analysis: "", news_analysis: "", combined_analysis: "" });
+    setChartData(null);
 
     // abort an existing stream if any
     abortRef.current?.abort();
@@ -71,6 +74,16 @@ export default function Analyze() {
         if (evt.type === "complete") {
           setProgress(evt.progress ?? 100);
           setStatus(evt.message ?? "Hoàn tất");
+          
+          // Fetch chart data after analysis completes
+          try {
+            const response = await AnalyzeService.chartData(searchValue.stockCode.trim().toUpperCase());
+            if (response.data?.success) {
+              setChartData(response.data);
+            }
+          } catch (chartError) {
+            console.error("Error fetching chart data:", chartError);
+          }
         }
       }
     } catch (e) {
@@ -114,13 +127,13 @@ export default function Analyze() {
         </CardContent>
       </Card>
 
-      {status && (
+      {status && progress < 100 && (
         <Card className="shadow-md">
           <CardContent className="pt-6">
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <p className="text-sm font-medium text-foreground">{status}</p>
-                <Badge variant={progress === 100 ? "default" : "secondary"}>
+                <Badge variant="secondary">
                   {progress}%
                 </Badge>
               </div>
@@ -133,6 +146,10 @@ export default function Analyze() {
             </div>
           </CardContent>
         </Card>
+      )}
+
+      {chartData && progress === 100 && (
+        <StockChart data={chartData} />
       )}
 
       {(sections.technical_analysis || sections.news_analysis || sections.combined_analysis) && (
