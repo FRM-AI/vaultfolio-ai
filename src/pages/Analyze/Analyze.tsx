@@ -1,7 +1,9 @@
-import { Search, TrendingUp, TrendingDown } from 'lucide-react';
+import { Search, TrendingUp, BarChart3, Newspaper, FileText } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Badge } from '@/components/ui/badge';
 import { useLanguage } from '@/contexts/LanguageContext';
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -85,15 +87,16 @@ export default function Analyze() {
         <p className="text-muted-foreground">{t.analyze.description}</p>
       </div>
 
-      <Card>
+      <Card className="shadow-lg">
         <CardContent className="pt-6">
-          <div className="flex gap-2">
+          <div className="flex gap-3">
             <Input
               type="text"
               placeholder={t.analyze.searchPlaceholder}
               className="flex-1"
               value={searchValue.stockCode}
               onChange={(e) => setSearchValue({ ...searchValue, stockCode: e.target.value })}
+              onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
             />
             <Input
               type="text"
@@ -101,6 +104,7 @@ export default function Analyze() {
               className="flex-1"
               value={searchValue.days}
               onChange={(e) => setSearchValue({ ...searchValue, days: e.target.value })}
+              onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
             />
             <Button className="bg-primary hover:bg-primary/90" onClick={handleSearch}>
               <Search className="h-4 w-4 mr-2" />
@@ -109,47 +113,128 @@ export default function Analyze() {
           </div>
         </CardContent>
       </Card>
-      <Card>
-        <CardContent className="pt-6">
-          {/* status + progress stays as-is */}
-          <div className="mt-4">
-            <p className="text-sm text-muted-foreground">{status}</p>
-            <div className="h-2 bg-muted rounded mt-2 overflow-hidden">
-              <div className="h-full bg-primary transition-all" style={{ width: `${Math.min(progress, 100)}%` }} />
-            </div>
-          </div>
 
-          {/* Markdown-rendered sections */}
-          <div className="mt-6 grid gap-8">
-            <div>
-              <h3 className="font-semibold mb-2">Kỹ thuật</h3>
-              <div className="prose dark:prose-invert max-w-none">
-                <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                  {sections.technical_analysis || "_Chưa có nội dung._"}
-                </ReactMarkdown>
+      {status && (
+        <Card className="shadow-md">
+          <CardContent className="pt-6">
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <p className="text-sm font-medium text-foreground">{status}</p>
+                <Badge variant={progress === 100 ? "default" : "secondary"}>
+                  {progress}%
+                </Badge>
+              </div>
+              <div className="h-3 bg-muted rounded-full overflow-hidden">
+                <div 
+                  className="h-full bg-gradient-to-r from-primary to-primary/80 transition-all duration-500 ease-out" 
+                  style={{ width: `${Math.min(progress, 100)}%` }} 
+                />
               </div>
             </div>
+          </CardContent>
+        </Card>
+      )}
 
-            <div>
-              <h3 className="font-semibold mb-2">Tin tức</h3>
-              <div className="prose dark:prose-invert max-w-none">
-                <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                  {sections.news_analysis || "_Chưa có nội dung._"}
-                </ReactMarkdown>
-              </div>
-            </div>
+      {(sections.technical_analysis || sections.news_analysis || sections.combined_analysis) && (
+        <Card className="shadow-lg">
+          <CardContent className="pt-6">
+            <Tabs defaultValue="combined" className="w-full">
+              <TabsList className="grid w-full grid-cols-3 mb-6">
+                <TabsTrigger value="technical" className="gap-2">
+                  <BarChart3 className="h-4 w-4" />
+                  Kỹ thuật
+                </TabsTrigger>
+                <TabsTrigger value="news" className="gap-2">
+                  <Newspaper className="h-4 w-4" />
+                  Tin tức
+                </TabsTrigger>
+                <TabsTrigger value="combined" className="gap-2">
+                  <FileText className="h-4 w-4" />
+                  Tổng hợp
+                </TabsTrigger>
+              </TabsList>
 
-            <div>
-              <h3 className="font-semibold mb-2">Tổng hợp</h3>
-              <div className="prose dark:prose-invert max-w-none">
-                <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                  {sections.combined_analysis || "_Chưa có nội dung._"}
-                </ReactMarkdown>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+              <TabsContent value="technical" className="mt-0">
+                <div className="prose prose-slate dark:prose-invert max-w-none prose-headings:text-foreground prose-p:text-foreground prose-strong:text-foreground prose-li:text-foreground prose-table:text-foreground">
+                  <ReactMarkdown 
+                    remarkPlugins={[remarkGfm]}
+                    components={{
+                      table: ({node, ...props}) => (
+                        <div className="overflow-x-auto my-6">
+                          <table className="min-w-full divide-y divide-border border border-border rounded-lg" {...props} />
+                        </div>
+                      ),
+                      thead: ({node, ...props}) => (
+                        <thead className="bg-muted/50" {...props} />
+                      ),
+                      th: ({node, ...props}) => (
+                        <th className="px-4 py-3 text-left text-sm font-semibold text-foreground" {...props} />
+                      ),
+                      td: ({node, ...props}) => (
+                        <td className="px-4 py-3 text-sm text-foreground border-t border-border" {...props} />
+                      ),
+                    }}
+                  >
+                    {sections.technical_analysis || "_Chưa có nội dung._"}
+                  </ReactMarkdown>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="news" className="mt-0">
+                <div className="prose prose-slate dark:prose-invert max-w-none prose-headings:text-foreground prose-p:text-foreground prose-strong:text-foreground prose-li:text-foreground prose-table:text-foreground">
+                  <ReactMarkdown 
+                    remarkPlugins={[remarkGfm]}
+                    components={{
+                      table: ({node, ...props}) => (
+                        <div className="overflow-x-auto my-6">
+                          <table className="min-w-full divide-y divide-border border border-border rounded-lg" {...props} />
+                        </div>
+                      ),
+                      thead: ({node, ...props}) => (
+                        <thead className="bg-muted/50" {...props} />
+                      ),
+                      th: ({node, ...props}) => (
+                        <th className="px-4 py-3 text-left text-sm font-semibold text-foreground" {...props} />
+                      ),
+                      td: ({node, ...props}) => (
+                        <td className="px-4 py-3 text-sm text-foreground border-t border-border" {...props} />
+                      ),
+                    }}
+                  >
+                    {sections.news_analysis || "_Chưa có nội dung._"}
+                  </ReactMarkdown>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="combined" className="mt-0">
+                <div className="prose prose-slate dark:prose-invert max-w-none prose-headings:text-foreground prose-p:text-foreground prose-strong:text-foreground prose-li:text-foreground prose-table:text-foreground">
+                  <ReactMarkdown 
+                    remarkPlugins={[remarkGfm]}
+                    components={{
+                      table: ({node, ...props}) => (
+                        <div className="overflow-x-auto my-6">
+                          <table className="min-w-full divide-y divide-border border border-border rounded-lg" {...props} />
+                        </div>
+                      ),
+                      thead: ({node, ...props}) => (
+                        <thead className="bg-muted/50" {...props} />
+                      ),
+                      th: ({node, ...props}) => (
+                        <th className="px-4 py-3 text-left text-sm font-semibold text-foreground" {...props} />
+                      ),
+                      td: ({node, ...props}) => (
+                        <td className="px-4 py-3 text-sm text-foreground border-t border-border" {...props} />
+                      ),
+                    }}
+                  >
+                    {sections.combined_analysis || "_Chưa có nội dung._"}
+                  </ReactMarkdown>
+                </div>
+              </TabsContent>
+            </Tabs>
+          </CardContent>
+        </Card>
+      )}
 
 
       {/* <div className="grid gap-4">
