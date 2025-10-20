@@ -38,7 +38,7 @@ export default function Analyze() {
     if (!searchValue.stockCode) return;
 
     // reset
-    setStatus("Đang phân tích...");
+    setStatus("Đang tải biểu đồ...");
     setProgress(0);
     setSections({ technical_analysis: "", news_analysis: "", combined_analysis: "" });
     setChartData(null);
@@ -49,6 +49,15 @@ export default function Analyze() {
     abortRef.current = controller;
 
     try {
+      // Step 1: Fetch chart data first
+      setStatus("Đang tải biểu đồ...");
+      const response = await AnalyzeService.chartData(searchValue.stockCode.trim().toUpperCase());
+      if (response) {
+        setChartData(response);
+      }
+
+      // Step 2: Run analysis after chart is loaded
+      setStatus("Đang phân tích...");
       const stream = AnalyzeService.insights(
         {
           ticker: searchValue.stockCode.trim().toUpperCase(),
@@ -75,17 +84,6 @@ export default function Analyze() {
         if (evt.type === "complete") {
           setProgress(evt.progress ?? 100);
           setStatus(evt.message ?? "Hoàn tất");
-          
-          // Fetch chart data after analysis completes
-          try {
-            const response = await AnalyzeService.chartData(searchValue.stockCode.trim().toUpperCase());
-            if (response) {
-              setChartData(response);
-              
-            }
-          } catch (chartError) {
-            console.error("Error fetching chart data:", chartError);
-          }
         }
       }
     } catch (e) {
