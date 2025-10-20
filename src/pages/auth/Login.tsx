@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Lock, Mail } from 'lucide-react';
-
+import AuthService from './Auth.service';
 const Login = () => {
   const { t } = useLanguage();
   const navigate = useNavigate();
@@ -15,8 +15,14 @@ const Login = () => {
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    // Mock login - just navigate to home
-    navigate('/');
+    AuthService.Login({ email, password })
+      .then(() => {
+        // Mock login - just navigate to home
+        navigate('/');
+      })
+      .catch((error) => {
+        console.error('Login failed:', error);
+      });
   };
 
   return (

@@ -20,6 +20,7 @@
     "title": "Phân tích cổ phiếu",
     "description": "Phân tích thông minh với AI để đưa ra quyết định đầu tư chính xác",
     "searchPlaceholder": "Nhập mã cổ phiếu (VD: VNM, VCB...)",
+    "searchPlaceholder_dates": "Nhập số ngày (VD: 30, 60, 90...)",
     "stockCode": "Mã CP",
     "price": "Giá",
     "change": "Thay đổi",

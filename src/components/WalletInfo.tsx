@@ -1,9 +1,20 @@
 import { Wallet, TrendingUp, ArrowUpRight } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { useLanguage } from '@/contexts/LanguageContext';
-
+import { WalletService } from '@/lib/Endpoint/Walllet.service';
+import { useState, useEffect } from 'react';
 export function WalletInfo() {
   const { t } = useLanguage();
+  const [walletData, setWalletData] = useState(null);
+  useEffect(() => {
+    WalletService.Get()
+      .then((data) => {
+        setWalletData(data);
+      })
+      .catch((error) => {
+        console.error('Failed to fetch wallet data:', error);
+      });
+  }, []);
 
   return (
     <Card className="p-4 bg-gradient-to-br from-primary/5 to-accent/5 border-primary/20">
@@ -15,26 +26,8 @@ export function WalletInfo() {
       <div className="space-y-2">
         <div>
           <p className="text-xs text-muted-foreground">{t.wallet.totalValue}</p>
-          <p className="text-lg font-bold text-foreground">2,450,000,000 ₫</p>
+          <p className="text-lg font-bold text-foreground">{walletData?.balance}</p>
         </div>
-{/*         
-        <div className="flex items-center gap-4">
-          <div>
-            <p className="text-xs text-muted-foreground">{t.wallet.profit}</p>
-            <div className="flex items-center gap-1 text-success">
-              <ArrowUpRight className="h-3 w-3" />
-              <span className="text-sm font-semibold">+345M ₫</span>
-            </div>
-          </div>
-          
-          <div>
-            <p className="text-xs text-muted-foreground">{t.wallet.roi}</p>
-            <div className="flex items-center gap-1 text-success">
-              <TrendingUp className="h-3 w-3" />
-              <span className="text-sm font-semibold">+16.4%</span>
-            </div>
-          </div>
-        </div> */}
       </div>
     </Card>
   );

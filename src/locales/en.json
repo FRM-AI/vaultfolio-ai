@@ -20,6 +20,7 @@
     "title": "Stock Analysis",
     "description": "AI-powered intelligent analysis for precise investment decisions",
     "searchPlaceholder": "Enter stock code (e.g., VNM, VCB...)",
+    "searchPlaceholder_dates": "Enter number of days (e.g., 30, 60, 90...)",
     "stockCode": "Code",
     "price": "Price",
     "change": "Change",
