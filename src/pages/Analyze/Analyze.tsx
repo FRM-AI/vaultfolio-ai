@@ -34,10 +34,13 @@ export default function Analyze() {
   });
   const [chartData, setChartData] = useState<any>(null);
   const abortRef = useRef<AbortController | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
   const handleSearch = async () => {
     if (!searchValue.stockCode) return;
 
     // reset
+    setIsLoading(true);
     setStatus("Đang tải biểu đồ...");
     setProgress(0);
     setSections({ technical_analysis: "", news_analysis: "", combined_analysis: "" });
@@ -89,6 +92,8 @@ export default function Analyze() {
     } catch (e) {
       console.error(e);
       setStatus("Có lỗi xảy ra khi phân tích.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -100,38 +105,45 @@ export default function Analyze() {
         <p className="text-muted-foreground">{t.analyze.description}</p>
       </div>
 
-      <Card className="shadow-lg">
+      <Card className="shadow-lg border-primary/20">
         <CardContent className="pt-6">
-          <div className="flex gap-3">
-            <Input
-              type="text"
-              placeholder={t.analyze.searchPlaceholder}
-              className="flex-1"
-              value={searchValue.stockCode}
-              onChange={(e) => setSearchValue({ ...searchValue, stockCode: e.target.value })}
-              onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-            />
-            <div className="flex gap-2">
+          <div className="flex flex-col md:flex-row gap-3">
+            <div className="flex-1 flex gap-3">
+              <Input
+                type="text"
+                placeholder={t.analyze.searchPlaceholder}
+                className="flex-1 h-11"
+                value={searchValue.stockCode}
+                onChange={(e) => setSearchValue({ ...searchValue, stockCode: e.target.value })}
+                onKeyDown={(e) => e.key === 'Enter' && !isLoading && handleSearch()}
+                disabled={isLoading}
+              />
               <Input
                 type="text"
                 placeholder={t.analyze.searchPlaceholder_dates}
-                className="flex-1"
+                className="w-24 h-11"
                 value={searchValue.days}
                 onChange={(e) => setSearchValue({ ...searchValue, days: e.target.value })}
-                onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                onKeyDown={(e) => e.key === 'Enter' && !isLoading && handleSearch()}
+                disabled={isLoading}
               />
               <select
                 value={searchValue.assetType}
                 onChange={(e) => setSearchValue({ ...searchValue, assetType: e.target.value })}
-                className="flex-1 px-3 py-2 rounded border bg-transparent text-foreground"
+                className="px-3 py-2 h-11 rounded-md border border-input bg-background text-foreground disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={isLoading}
               >
                 <option value="stock">{t.analyze.search_type_1}</option>
                 <option value="crypto">{t.analyze.search_type_2}</option>
               </select>
             </div>
-            <Button className="bg-primary hover:bg-primary/90" onClick={handleSearch}>
+            <Button 
+              className="bg-primary hover:bg-primary/90 h-11 px-6" 
+              onClick={handleSearch}
+              disabled={isLoading || !searchValue.stockCode}
+            >
               <Search className="h-4 w-4 mr-2" />
-              Search
+              {isLoading ? "Đang tải..." : "Search"}
             </Button>
           </div>
         </CardContent>

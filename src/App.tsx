@@ -10,7 +10,7 @@ import AuthLayout from "@/components/layout/AuthLayout";
 import Index from "./pages/Index";
 import Login from "./pages/auth/Login";
 import Analyze from "./pages/Analyze/Analyze";
-import Optimize from "./pages/Optimize";
+import Optimize from "./pages/Optimize/Optimize";
 import History from "./pages/History";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
