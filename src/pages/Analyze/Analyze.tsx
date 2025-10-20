@@ -10,19 +10,20 @@ import remarkGfm from "remark-gfm";
 import { AnalyzeService } from './Analyze.service';
 import { useRef, useState } from "react";
 import { StockChart } from '@/components/StockChart';
-const mockStocks = [
-  { code: 'VNM', name: 'Vinamilk', price: '78,500', change: '+2.3%', positive: true, volume: '1.2M', marketCap: '120T', pe: '18.5' },
-  { code: 'VCB', name: 'Vietcombank', price: '92,300', change: '+1.8%', positive: true, volume: '3.5M', marketCap: '450T', pe: '15.2' },
-  { code: 'HPG', name: 'Hòa Phát', price: '23,450', change: '-1.2%', positive: false, volume: '8.7M', marketCap: '85T', pe: '12.8' },
-  { code: 'VHM', name: 'Vinhomes', price: '65,200', change: '+3.1%', positive: true, volume: '2.1M', marketCap: '280T', pe: '22.3' },
-];
+// const mockStocks = [
+//   { code: 'VNM', name: 'Vinamilk', price: '78,500', change: '+2.3%', positive: true, volume: '1.2M', marketCap: '120T', pe: '18.5' },
+//   { code: 'VCB', name: 'Vietcombank', price: '92,300', change: '+1.8%', positive: true, volume: '3.5M', marketCap: '450T', pe: '15.2' },
+//   { code: 'HPG', name: 'Hòa Phát', price: '23,450', change: '-1.2%', positive: false, volume: '8.7M', marketCap: '85T', pe: '12.8' },
+//   { code: 'VHM', name: 'Vinhomes', price: '65,200', change: '+3.1%', positive: true, volume: '2.1M', marketCap: '280T', pe: '22.3' },
+// ];
 type SectionKey = "technical_analysis" | "news_analysis" | "combined_analysis";
 
 export default function Analyze() {
   const { t } = useLanguage();
-  const [searchValue, setSearchValue] = useState<{ stockCode: string; days: string }>({
+  const [searchValue, setSearchValue] = useState<{ stockCode: string; days: string; assetType: string }>({
     stockCode: '',
     days: '',
+    assetType: 'stock',
   });
   const [status, setStatus] = useState<string>("");
   const [progress, setProgress] = useState<number>(0);
@@ -78,8 +79,9 @@ export default function Analyze() {
           // Fetch chart data after analysis completes
           try {
             const response = await AnalyzeService.chartData(searchValue.stockCode.trim().toUpperCase());
-            if (response.data?.success) {
-              setChartData(response.data);
+            if (response) {
+              setChartData(response);
+              
             }
           } catch (chartError) {
             console.error("Error fetching chart data:", chartError);
@@ -111,14 +113,24 @@ export default function Analyze() {
               onChange={(e) => setSearchValue({ ...searchValue, stockCode: e.target.value })}
               onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
             />
-            <Input
-              type="text"
-              placeholder={t.analyze.searchPlaceholder_dates}
-              className="flex-1"
-              value={searchValue.days}
-              onChange={(e) => setSearchValue({ ...searchValue, days: e.target.value })}
-              onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-            />
+            <div className="flex gap-2">
+              <Input
+                type="text"
+                placeholder={t.analyze.searchPlaceholder_dates}
+                className="flex-1"
+                value={searchValue.days}
+                onChange={(e) => setSearchValue({ ...searchValue, days: e.target.value })}
+                onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+              />
+              <select
+                value={searchValue.assetType}
+                onChange={(e) => setSearchValue({ ...searchValue, assetType: e.target.value })}
+                className="flex-1 px-3 py-2 rounded border bg-transparent text-foreground"
+              >
+                <option value="stock">{t.analyze.search_type_1}</option>
+                <option value="crypto">{t.analyze.search_type_2}</option>
+              </select>
+            </div>
             <Button className="bg-primary hover:bg-primary/90" onClick={handleSearch}>
               <Search className="h-4 w-4 mr-2" />
               Search
@@ -136,7 +148,7 @@ export default function Analyze() {
                 <Badge variant="secondary">
                   {progress}%
                 </Badge>
-              </div>z
+              </div>
               <div className="h-3 bg-muted rounded-full overflow-hidden">
                 <div 
                   className="h-full bg-gradient-to-r from-primary to-primary/80 transition-all duration-500 ease-out" 
@@ -148,7 +160,7 @@ export default function Analyze() {
         </Card>
       )}
 
-      {chartData && progress === 100 && (
+      {chartData && (
         <StockChart data={chartData} />
       )}
 
