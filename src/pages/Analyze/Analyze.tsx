@@ -136,7 +136,7 @@ export default function Analyze() {
                 <Badge variant="secondary">
                   {progress}%
                 </Badge>
-              </div>
+              </div>z
               <div className="h-3 bg-muted rounded-full overflow-hidden">
                 <div 
                   className="h-full bg-gradient-to-r from-primary to-primary/80 transition-all duration-500 ease-out" 
