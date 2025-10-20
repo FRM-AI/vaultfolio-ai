@@ -23,7 +23,7 @@ export default function Analyze() {
   const [searchValue, setSearchValue] = useState<{ stockCode: string; days: string; assetType: string }>({
     stockCode: '',
     days: '',
-    assetType: 'stock',
+    assetType: "stock",
   });
   const [status, setStatus] = useState<string>("");
   const [progress, setProgress] = useState<number>(0);
@@ -51,7 +51,7 @@ export default function Analyze() {
     try {
       // Step 1: Fetch chart data first
       setStatus("Đang tải biểu đồ...");
-      const response = await AnalyzeService.chartData(searchValue.stockCode.trim().toUpperCase());
+      const response = await AnalyzeService.chartData(searchValue.stockCode.trim().toUpperCase(), searchValue.assetType);
       if (response) {
         setChartData(response);
       }
