@@ -9,7 +9,6 @@ import DefaultLayout from "@/components/layout/DefaultLayout";
 import AuthLayout from "@/components/layout/AuthLayout";
 import Index from "./pages/Index";
 import Login from "./pages/auth/Login";
-import Analyze from "./pages/Analyze/Analyze";
 import Optimize from "./pages/Optimize/Optimize";
 import History from "./pages/History";
 import Settings from "./pages/Settings";
@@ -33,7 +32,7 @@ const App = () => (
               {/* App routes with default layout */}
               <Route element={<DefaultLayout />}>
                 <Route path="/" element={<Index />} />
-                <Route path="/analyze" element={<Analyze />} />
+                {/* <Route path="/analyze" element={<Index autoFocusAnalyze />} /> */}
                 <Route path="/optimize" element={<Optimize />} />
                 {/* <Route path="/history" element={<History />} /> */}
                 <Route path="/settings" element={<Settings />} />
