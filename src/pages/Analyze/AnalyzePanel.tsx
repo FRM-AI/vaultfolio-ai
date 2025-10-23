@@ -12,7 +12,7 @@ import { AnalyzeService } from "./Analyze.service";
 import { StockChart } from "@/components/StockChart";
 import { STOCK_SUGGESTIONS } from "@/constants/stocks";
 
-type SectionKey = "technical_analysis" | "news_analysis" | "combined_analysis";
+type SectionKey = "technical_analysis" | "news_analysis" | "proprietary_trading_analysis" |"foreign_trading_analysis" | "shareholder_trading_analysis" | "intraday_analysis";
 
 const MAX_SUGGESTIONS = 6;
 
@@ -28,7 +28,10 @@ export default function AnalyzePanel() {
 	const [sections, setSections] = useState<Record<SectionKey, string>>({
 		technical_analysis: "",
 		news_analysis: "",
-		combined_analysis: "",
+		proprietary_trading_analysis: "",
+		foreign_trading_analysis: "",
+		shareholder_trading_analysis: "",
+		intraday_analysis: "",
 	});
 	const [chartData, setChartData] = useState<any>(null);
 	const abortRef = useRef<AbortController | null>(null);
@@ -47,56 +50,84 @@ export default function AnalyzePanel() {
 		).slice(0, MAX_SUGGESTIONS);
 	}, [normalizedQuery]);
 
-	const handleSearch = async () => {
-		if (!normalizedQuery) return;
+	const sectionLabels = useMemo<Record<SectionKey, string>>(
+		() => ({
+			technical_analysis: t.analyze.sections.technical_analysis,
+			news_analysis: t.analyze.sections.news_analysis,
+			proprietary_trading_analysis: t.analyze.sections.proprietary_trading_analysis,
+			foreign_trading_analysis: t.analyze.sections.foreign_trading_analysis,
+			shareholder_trading_analysis: t.analyze.sections.shareholder_trading_analysis,
+			intraday_analysis: t.analyze.sections.intraday_analysis,
+		}),
+		[t]
+	);
 
-			setShowSuggestions(false);
-		setIsLoading(true);
-		setStatus("Đang tải biểu đồ...");
-		setProgress(0);
-		setSections({ technical_analysis: "", news_analysis: "", combined_analysis: "" });
-		setChartData(null);
-
+	const handleStreaming = async (sectionKey: SectionKey, api: any) => {
+		const sectionLabel = sectionLabels[sectionKey] ?? "";
+		setStatus(t.analyze.status.analyzing.replace("{{section}}", sectionLabel));
 		abortRef.current?.abort();
 		const controller = new AbortController();
 		abortRef.current = controller;
 
+		const stream = api(
+			{
+				ticker: normalizedQuery,
+				look_back_days: Number.parseInt(searchValue.days || "30", 10),
+			},
+			{ signal: controller.signal }
+		);
+
+		for await (const evt of stream) {
+			if (evt.type === "status") {
+				setStatus(evt.message ?? "");
+				if (typeof evt.progress === "number") setProgress(evt.progress);
+			}
+
+			if (evt.type === "content") {
+				const key = (evt.section as SectionKey) ?? sectionKey;
+				const text = evt.text ?? "";
+				setSections((prev) => ({ ...prev, [key]: (prev[key] || "") + text }));
+			}
+
+			if (evt.type === "complete") {
+				setProgress(evt.progress ?? 100);
+				setStatus(evt.message ?? t.analyze.status.complete);
+			}
+		}
+	};
+
+	const handleSearch = async () => {
+		if (!normalizedQuery) return;
+
+		setShowSuggestions(false);
+		setIsLoading(true);
+		setStatus(t.analyze.status.loadingChart);
+		setProgress(0);
+		setSections({ 
+			technical_analysis: "", 
+			news_analysis: "", 
+			proprietary_trading_analysis: "", 
+			foreign_trading_analysis: "", 
+			shareholder_trading_analysis: "",
+			intraday_analysis: ""
+		});
+		setChartData(null);
+
 		try {
-			setStatus("Đang tải biểu đồ...");
+			setStatus(t.analyze.status.loadingChart);
 			const response = await AnalyzeService.chartData(normalizedQuery, searchValue.assetType);
 			if (response) {
 				setChartData(response);
 			}
-
-			setStatus("Đang phân tích...");
-			const stream = AnalyzeService.insights(
-				{
-					ticker: normalizedQuery,
-					look_back_days: Number.parseInt(searchValue.days || "30", 10),
-				},
-				{ signal: controller.signal }
-			);
-
-			for await (const evt of stream) {
-				if (evt.type === "status") {
-					setStatus(evt.message ?? "");
-					if (typeof evt.progress === "number") setProgress(evt.progress);
-				}
-
-				if (evt.type === "content") {
-					const key = evt.section as SectionKey;
-					const text = evt.text ?? "";
-					setSections((prev) => ({ ...prev, [key]: (prev[key] || "") + text }));
-				}
-
-				if (evt.type === "complete") {
-					setProgress(evt.progress ?? 100);
-					setStatus(evt.message ?? "Hoàn tất");
-				}
-			}
+			await handleStreaming("intraday_analysis", AnalyzeService.intradayMatchAnalysisStream);
+			await handleStreaming("shareholder_trading_analysis", AnalyzeService.shareholderTradingAnalysisStream);
+			await handleStreaming("foreign_trading_analysis", AnalyzeService.foreignTradingAnalysisStream);
+			await handleStreaming("proprietary_trading_analysis", AnalyzeService.proprietaryTradingAnalysisStream);
+			await handleStreaming("technical_analysis", AnalyzeService.technicalAnalysisStream);
+			await handleStreaming("news_analysis", AnalyzeService.newsAnalysisStream);
 		} catch (error) {
 			console.error(error);
-			setStatus("Có lỗi xảy ra khi phân tích.");
+			setStatus(t.analyze.status.error);
 		} finally {
 			setIsLoading(false);
 		}
@@ -192,7 +223,7 @@ export default function AnalyzePanel() {
 							disabled={isLoading || !normalizedQuery}
 						>
 							<Search className="h-4 w-4 mr-2" />
-							{isLoading ? "Đang tải..." : "Search"}
+							{isLoading ? t.analyze.button.loading : t.analyze.button.search}
 						</Button>
 					</div>
 				</CardContent>
@@ -219,22 +250,34 @@ export default function AnalyzePanel() {
 
 			{chartData && <StockChart data={chartData} />}
 
-			{(sections.technical_analysis || sections.news_analysis || sections.combined_analysis) && (
+			{(sections.technical_analysis || sections.news_analysis || sections.proprietary_trading_analysis || sections.foreign_trading_analysis || sections.shareholder_trading_analysis) && (
 				<Card className="shadow-lg">
 					<CardContent className="pt-6">
-						<Tabs defaultValue="combined" className="w-full">
-							<TabsList className="grid w-full grid-cols-3 mb-6">
+						<Tabs defaultValue="technical" className="w-full">
+							<TabsList className="grid w-full grid-cols-6 mb-6">
 								<TabsTrigger value="technical" className="gap-2">
 									<BarChart3 className="h-4 w-4" />
-									Kỹ thuật
+									{t.analyze.tabs.technical}
 								</TabsTrigger>
 								<TabsTrigger value="news" className="gap-2">
 									<Newspaper className="h-4 w-4" />
-									Tin tức
+									{t.analyze.tabs.news}
 								</TabsTrigger>
-								<TabsTrigger value="combined" className="gap-2">
+								<TabsTrigger value="proprietaryTrading" className="gap-2">
 									<FileText className="h-4 w-4" />
-									Tổng hợp
+									{t.analyze.tabs.proprietaryTrading}
+								</TabsTrigger>
+								<TabsTrigger value="foreignTrading" className="gap-2">
+									<FileText className="h-4 w-4" />
+									{t.analyze.tabs.foreignTrading}
+								</TabsTrigger>
+								<TabsTrigger value="shareholderTrading" className="gap-2">
+									<FileText className="h-4 w-4" />
+									{t.analyze.tabs.shareholderTrading}
+								</TabsTrigger>
+								<TabsTrigger value="intradayAnalysis" className="gap-2">
+									<FileText className="h-4 w-4" />
+									{t.analyze.tabs.intraday}
 								</TabsTrigger>
 							</TabsList>
 
@@ -257,7 +300,7 @@ export default function AnalyzePanel() {
 											),
 										}}
 									>
-										{sections.technical_analysis || "_Chưa có nội dung._"}
+										{sections.technical_analysis || t.analyze.noContent}
 									</ReactMarkdown>
 								</div>
 							</TabsContent>
@@ -281,12 +324,12 @@ export default function AnalyzePanel() {
 											),
 										}}
 									>
-										{sections.news_analysis || "_Chưa có nội dung._"}
+										{sections.news_analysis || t.analyze.noContent}
 									</ReactMarkdown>
 								</div>
 							</TabsContent>
 
-							<TabsContent value="combined" className="mt-0">
+							<TabsContent value="proprietaryTrading" className="mt-0">
 								<div className="prose prose-slate dark:prose-invert max-w-none prose-headings:text-foreground prose-p:text-foreground prose-strong:text-foreground prose-li:text-foreground prose-table:text-foreground">
 									<ReactMarkdown
 										remarkPlugins={[remarkGfm]}
@@ -305,7 +348,76 @@ export default function AnalyzePanel() {
 											),
 										}}
 									>
-										{sections.combined_analysis || "_Chưa có nội dung._"}
+										{sections.proprietary_trading_analysis || t.analyze.noContent}
+									</ReactMarkdown>
+								</div>
+							</TabsContent>
+							<TabsContent value="foreignTrading" className="mt-0">
+								<div className="prose prose-slate dark:prose-invert max-w-none prose-headings:text-foreground prose-p:text-foreground prose-strong:text-foreground prose-li:text-foreground prose-table:text-foreground">
+									<ReactMarkdown
+										remarkPlugins={[remarkGfm]}
+										components={{
+											table: ({ node, ...props }) => (
+												<div className="overflow-x-auto my-6">
+													<table className="min-w-full divide-y divide-border border border-border rounded-lg" {...props} />
+												</div>
+											),
+											thead: ({ node, ...props }) => <thead className="bg-muted/50" {...props} />,
+											th: ({ node, ...props }) => (
+												<th className="px-4 py-3 text-left text-sm font-semibold text-foreground" {...props} />
+											),
+											td: ({ node, ...props }) => (
+												<td className="px-4 py-3 text-sm text-foreground border-t border-border" {...props} />
+											),
+										}}
+									>
+										{sections.foreign_trading_analysis || t.analyze.noContent}
+									</ReactMarkdown>
+								</div>
+							</TabsContent>
+							<TabsContent value="shareholderTrading" className="mt-0">
+								<div className="prose prose-slate dark:prose-invert max-w-none prose-headings:text-foreground prose-p:text-foreground prose-strong:text-foreground prose-li:text-foreground prose-table:text-foreground">
+									<ReactMarkdown
+										remarkPlugins={[remarkGfm]}
+										components={{
+											table: ({ node, ...props }) => (
+												<div className="overflow-x-auto my-6">
+													<table className="min-w-full divide-y divide-border border border-border rounded-lg" {...props} />
+												</div>
+											),
+											thead: ({ node, ...props }) => <thead className="bg-muted/50" {...props} />,
+											th: ({ node, ...props }) => (
+												<th className="px-4 py-3 text-left text-sm font-semibold text-foreground" {...props} />
+											),
+											td: ({ node, ...props }) => (
+												<td className="px-4 py-3 text-sm text-foreground border-t border-border" {...props} />
+											),
+										}}
+									>
+										{sections.shareholder_trading_analysis || t.analyze.noContent}
+									</ReactMarkdown>
+								</div>
+							</TabsContent>
+							<TabsContent value="intradayAnalysis" className="mt-0">
+								<div className="prose prose-slate dark:prose-invert max-w-none prose-headings:text-foreground prose-p:text-foreground prose-strong:text-foreground prose-li:text-foreground prose-table:text-foreground">
+									<ReactMarkdown
+										remarkPlugins={[remarkGfm]}
+										components={{
+											table: ({ node, ...props }) => (
+												<div className="overflow-x-auto my-6">
+													<table className="min-w-full divide-y divide-border border border-border rounded-lg" {...props} />
+												</div>
+											),
+											thead: ({ node, ...props }) => <thead className="bg-muted/50" {...props} />,
+											th: ({ node, ...props }) => (
+												<th className="px-4 py-3 text-left text-sm font-semibold text-foreground" {...props} />
+											),
+											td: ({ node, ...props }) => (
+												<td className="px-4 py-3 text-sm text-foreground border-t border-border" {...props} />
+											),
+										}}
+									>
+										{sections.intraday_analysis || t.analyze.noContent}
 									</ReactMarkdown>
 								</div>
 							</TabsContent>

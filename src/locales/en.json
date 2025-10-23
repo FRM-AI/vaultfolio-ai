@@ -28,7 +28,98 @@
     "change": "Change",
     "volume": "Volume",
     "marketCap": "Market Cap",
-    "pe": "P/E"
+    "pe": "P/E",
+    "button": {
+      "search": "Search",
+      "loading": "Loading..."
+    },
+    "status": {
+      "loadingChart": "Loading chart...",
+      "analyzing": "Analyzing {{section}}...",
+      "complete": "Completed",
+      "error": "An error occurred during analysis."
+    },
+    "tabs": {
+      "technical": "Technical",
+      "news": "News",
+      "proprietaryTrading": "Proprietary trading",
+      "foreignTrading": "Foreign trading",
+      "shareholderTrading": "Major shareholder trading",
+      "intraday": "Intraday trading"
+    },
+    "sections": {
+      "technical_analysis": "technical analysis",
+      "news_analysis": "news analysis",
+      "proprietary_trading_analysis": "proprietary trading analysis",
+      "foreign_trading_analysis": "foreign trading analysis",
+      "shareholder_trading_analysis": "major shareholder trading",
+      "intraday_analysis": "intraday trading"
+    },
+    "noContent": "_No content yet._"
+  },
+  "chart": {
+    "titlePrefix": "Chart",
+    "summary": {
+      "currentPrice": "Current price",
+      "change": "Change",
+      "changePercent": "Change %",
+      "volume": "Volume"
+    },
+    "assetType": {
+      "stock": "VN Stocks",
+      "crypto": "Crypto"
+    },
+    "inputPlaceholder": {
+      "stock": "Eg: VCB, FPT",
+      "crypto": "Eg: BTC, ETH"
+    },
+    "errors": {
+      "noData": "No data to display",
+      "invalidData": "Chart data is invalid",
+      "invalidSymbol": "Please enter a valid symbol",
+      "noResponse": "No response from server",
+      "apiError": "The API returned an error",
+      "notFound": "No chart data found for this symbol",
+      "badFormat": "Chart data has an unexpected format"
+    },
+    "loading": {
+      "overlay": "Loading chart data..."
+    },
+    "toast": {
+      "successTitle": "Success",
+      "successDescription": "Loaded data for {{symbol}}",
+      "errorTitle": "Error"
+    },
+    "actions": {
+      "showIndicators": "Show indicators",
+      "hideIndicators": "Hide indicators"
+    },
+    "chartType": {
+      "label": "Chart type",
+      "candlestick": "Candlestick",
+      "line": "Line"
+    },
+    "volume": {
+      "label": "Volume"
+    },
+    "movingAverages": {
+      "heading": "Moving averages",
+      "sma": "SMA",
+      "ema": "EMA",
+      "period": "Period"
+    },
+    "bollinger": {
+      "label": "Bollinger Bands",
+      "period": "Period",
+      "stdDev": "Std. deviation"
+    },
+    "rsi": {
+      "label": "RSI",
+      "period": "Period"
+    },
+    "general": {
+      "cannotLoad": "Unable to load data"
+    }
   },
   "optimize": {
     "title": "Portfolio Optimization",

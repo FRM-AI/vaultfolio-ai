@@ -28,7 +28,98 @@
     "change": "Thay đổi",
     "volume": "Khối lượng",
     "marketCap": "Vốn hóa",
-    "pe": "P/E"
+    "pe": "P/E",
+    "button": {
+      "search": "Tìm kiếm",
+      "loading": "Đang tải..."
+    },
+    "status": {
+      "loadingChart": "Đang tải biểu đồ...",
+      "analyzing": "Đang phân tích {{section}}...",
+      "complete": "Hoàn tất",
+      "error": "Có lỗi xảy ra khi phân tích."
+    },
+    "tabs": {
+      "technical": "Kỹ thuật",
+      "news": "Tin tức",
+      "proprietaryTrading": "Tự doanh",
+      "foreignTrading": "Khối ngoại",
+      "shareholderTrading": "Cổ đông lớn",
+      "intraday": "Trong ngày"
+    },
+    "sections": {
+      "technical_analysis": "phân tích kỹ thuật",
+      "news_analysis": "phân tích tin tức",
+      "proprietary_trading_analysis": "giao dịch tự doanh",
+      "foreign_trading_analysis": "giao dịch khối ngoại",
+      "shareholder_trading_analysis": "giao dịch cổ đông lớn",
+      "intraday_analysis": "phân tích trong ngày"
+    },
+    "noContent": "_Chưa có nội dung._"
+  },
+  "chart": {
+    "titlePrefix": "Biểu đồ",
+    "summary": {
+      "currentPrice": "Giá hiện tại",
+      "change": "Thay đổi",
+      "changePercent": "% Thay đổi",
+      "volume": "Khối lượng"
+    },
+    "assetType": {
+      "stock": "Cổ phiếu VN",
+      "crypto": "Crypto"
+    },
+    "inputPlaceholder": {
+      "stock": "VD: VCB, FPT",
+      "crypto": "VD: BTC, ETH"
+    },
+    "errors": {
+      "noData": "Không có dữ liệu để hiển thị",
+      "invalidData": "Dữ liệu biểu đồ không hợp lệ",
+      "invalidSymbol": "Vui lòng nhập mã hợp lệ",
+      "noResponse": "Không nhận được dữ liệu từ server",
+      "apiError": "API trả về lỗi",
+      "notFound": "Không tìm thấy dữ liệu biểu đồ cho mã này",
+      "badFormat": "Dữ liệu biểu đồ không đúng định dạng"
+    },
+    "loading": {
+      "overlay": "Đang tải dữ liệu biểu đồ..."
+    },
+    "toast": {
+      "successTitle": "Thành công",
+      "successDescription": "Đã tải dữ liệu cho {{symbol}}",
+      "errorTitle": "Lỗi"
+    },
+    "actions": {
+      "showIndicators": "Hiện chỉ báo",
+      "hideIndicators": "Ẩn chỉ báo"
+    },
+    "chartType": {
+      "label": "Loại biểu đồ",
+      "candlestick": "Nến Nhật",
+      "line": "Đường"
+    },
+    "volume": {
+      "label": "Khối lượng"
+    },
+    "movingAverages": {
+      "heading": "Đường trung bình",
+      "sma": "SMA",
+      "ema": "EMA",
+      "period": "Chu kỳ"
+    },
+    "bollinger": {
+      "label": "Bollinger Bands",
+      "period": "Chu kỳ",
+      "stdDev": "Độ lệch chuẩn"
+    },
+    "rsi": {
+      "label": "RSI",
+      "period": "Chu kỳ"
+    },
+    "general": {
+      "cannotLoad": "Không thể tải dữ liệu"
+    }
   },
   "optimize": {
     "title": "Tối ưu danh mục",
