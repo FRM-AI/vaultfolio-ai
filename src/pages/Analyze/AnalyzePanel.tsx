@@ -20,6 +20,11 @@ type SectionKey =
 	| "shareholder_trading_analysis"
 	| "intraday_analysis";
 
+type DisplaySection = {
+	key: SectionKey;
+	label: string;
+};
+
 type SectionState = Record<SectionKey, string>;
 
 type AnalyzeStreamEvent = {
@@ -28,6 +33,7 @@ type AnalyzeStreamEvent = {
 	progress?: number;
 	section?: SectionKey;
 	text?: string;
+	title?: string;
 	[key: string]: unknown;
 };
 
@@ -158,10 +164,32 @@ export default function AnalyzePanel() {
 						continue;
 					}
 
+					// Ensure a visible entry is created for section start
+					if (evt.type === "section_start") {
+						const key = (evt.section as SectionKey) ?? sectionKey;
+						const title = typeof evt.title === "string" ? evt.title : sectionLabel;
+						setSections((prev) => ({
+							...prev,
+							[key]: prev[key] ? prev[key] : `## ${title}\n\n`,
+						}));
+						continue;
+					}
+
 					if (evt.type === "content") {
 						const key = (evt.section as SectionKey) ?? sectionKey;
 						const text = typeof evt.text === "string" ? evt.text : "";
 						setSections((prev) => ({ ...prev, [key]: (prev[key] || "") + text }));
+						continue;
+					}
+
+					// Surface errors inside the corresponding tab so users see what happened
+					if (evt.type === "error") {
+						const key = (evt.section as SectionKey) ?? sectionKey;
+						const msg = typeof evt.message === "string" ? evt.message : "";
+						setSections((prev) => ({
+							...prev,
+							[key]: (prev[key] || "") + `\n\n> ❗ ${msg}`,
+						}));
 						continue;
 					}
 
@@ -220,6 +248,11 @@ export default function AnalyzePanel() {
 				payload: Record<string, unknown>;
 			}> = [
 				{
+					key: "proprietary_trading_analysis",
+					stream: AnalyzeService.proprietaryTradingAnalysisStream,
+					payload: { ticker: normalizedQuery },
+				},
+				{
 					key: "intraday_analysis",
 					stream: AnalyzeService.intradayMatchAnalysisStream,
 					payload: { ticker: normalizedQuery },
@@ -232,11 +265,6 @@ export default function AnalyzePanel() {
 				{
 					key: "foreign_trading_analysis",
 					stream: AnalyzeService.foreignTradingAnalysisStream,
-					payload: { ticker: normalizedQuery },
-				},
-				{
-					key: "proprietary_trading_analysis",
-					stream: AnalyzeService.proprietaryTradingAnalysisStream,
 					payload: { ticker: normalizedQuery },
 				},
 				{
