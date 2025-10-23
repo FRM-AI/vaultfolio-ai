@@ -53,7 +53,7 @@ const Index = ({ autoFocusAnalyze = false }: IndexProps) => {
         <AnalyzePanel />
       </section>
 
-      <Card className="bg-gradient-to-br from-primary/5 to-accent/5 border-primary/20">
+      {/* <Card className="bg-gradient-to-br from-primary/5 to-accent/5 border-primary/20">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <TrendingUp className="h-6 w-6 text-primary" />
@@ -84,7 +84,7 @@ const Index = ({ autoFocusAnalyze = false }: IndexProps) => {
             </div>
           </div>
         </CardContent>
-      </Card>
+      </Card> */}
     </div>
   );
 };
