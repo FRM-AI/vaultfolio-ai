@@ -147,6 +147,26 @@ export default function AnalyzePanel() {
 		[t]
 	);
 
+	// Helper to transform backend status messages to user-friendly Vietnamese
+	const transformStatus = useCallback((rawStatus: string): string => {
+		// Replace technical section keys with Vietnamese labels
+		const statusMap: Record<string, string> = {
+			'proprietary_trading_analysis': sectionLabels['proprietary_trading_analysis'] || 'tự doanh',
+			'foreign_trading_analysis': sectionLabels['foreign_trading_analysis'] || 'khối ngoại',
+			'shareholder_trading_analysis': sectionLabels['shareholder_trading_analysis'] || 'cổ đông lớn',
+			'intraday_analysis': sectionLabels['intraday_analysis'] || 'trong ngày',
+			'technical_analysis': sectionLabels['technical_analysis'] || 'kỹ thuật',
+			'news_analysis': sectionLabels['news_analysis'] || 'tin tức',
+		};
+
+		let transformed = rawStatus;
+		for (const [key, label] of Object.entries(statusMap)) {
+			transformed = transformed.replace(new RegExp(key, 'gi'), label);
+		}
+
+		return transformed;
+	}, [sectionLabels]);
+
 	const handleStreaming = useCallback(
 		async (sectionKey: SectionKey, stream: AnalyzeStream, payload: Record<string, unknown>) => {
 			const controller = new AbortController();
@@ -157,7 +177,8 @@ export default function AnalyzePanel() {
 			try {
 				for await (const evt of stream(payload, { signal: controller.signal })) {
 					if (evt.type === "status") {
-						setStatus(evt.message ?? "");
+						const rawMessage = evt.message ?? "";
+						setStatus(transformStatus(rawMessage));
 						if (typeof evt.progress === "number") {
 							setProgress(evt.progress);
 						}
