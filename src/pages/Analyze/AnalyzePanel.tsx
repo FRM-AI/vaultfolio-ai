@@ -47,13 +47,14 @@ const createEmptySections = (): SectionState => ({
 
 const markdownComponents = {
 	table: (props) => (
-		<div className="overflow-x-auto my-6">
-			<table className="min-w-full divide-y divide-border border border-border rounded-lg" {...props} />
+		<div className="overflow-x-auto my-8 rounded-lg border-2 border-primary/20 shadow-[var(--shadow-card)]">
+			<table className="min-w-full divide-y divide-border" {...props} />
 		</div>
 	),
-	thead: (props) => <thead className="bg-muted/50" {...props} />,
-	th: (props) => <th className="px-4 py-3 text-left text-sm font-semibold text-foreground" {...props} />,
-	td: (props) => <td className="px-4 py-3 text-sm text-foreground border-t border-border" {...props} />,
+	thead: (props) => <thead className="bg-gradient-to-r from-primary/10 to-accent/10" {...props} />,
+	th: (props) => <th className="px-6 py-4 text-left text-sm font-bold text-foreground uppercase tracking-wider" {...props} />,
+	td: (props) => <td className="px-6 py-4 text-sm text-foreground border-t border-border hover:bg-muted/50 transition-colors" {...props} />,
+	tr: (props) => <tr className="hover:bg-muted/30 transition-colors" {...props} />,
 };
 
 const MAX_SUGGESTIONS = 6;
@@ -289,51 +290,58 @@ export default function AnalyzePanel() {
 	}, []);
 
 	return (
-		<div className="space-y-6">
-			<div>
-				<h2 className="text-3xl font-bold text-foreground mb-2">{t.analyze.title}</h2>
-				<p className="text-muted-foreground">{t.analyze.description}</p>
+		<div className="space-y-8">
+			{/* Header Section */}
+			<div className="text-center space-y-2 animate-fade-in">
+				<h2 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-primary via-primary-glow to-accent bg-clip-text text-transparent">
+					{t.analyze.title}
+				</h2>
+				<p className="text-muted-foreground text-lg">{t.analyze.description}</p>
 			</div>
 
-			<Card className="shadow-lg border-primary/20">
+			{/* Search Section */}
+			<Card className="border-primary/20 shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-hover)] transition-[box-shadow] duration-300 animate-fade-in">
 				<CardContent className="pt-6">
 					<div className="flex flex-col md:flex-row gap-3">
-						<div className="flex-1 flex gap-3">
+						<div className="flex-1 flex flex-col sm:flex-row gap-3">
 							<div className="relative flex-1">
-								<Input
-									type="text"
-									placeholder={t.analyze.searchPlaceholder}
-									className="h-11 w-full"
-									value={searchValue.stockCode}
-									onFocus={() => setShowSuggestions(true)}
-									onBlur={() => setTimeout(() => setShowSuggestions(false), 120)}
-									onChange={(event) => {
-										const next = event.target.value.toUpperCase();
-										setShowSuggestions(true);
-										setSearchValue((prev) => ({ ...prev, stockCode: next }));
-									}}
-									onKeyDown={(event) => {
-										if (event.key === "Enter" && !isLoading) {
-											setShowSuggestions(false);
-											handleSearch();
-										}
-									}}
-									disabled={isLoading}
-								/>
+								<div className="relative">
+									<Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none z-10" />
+									<Input
+										type="text"
+										placeholder={t.analyze.searchPlaceholder}
+										className="h-12 w-full pl-10 pr-4 border-2 focus:border-primary transition-colors"
+										value={searchValue.stockCode}
+										onFocus={() => setShowSuggestions(true)}
+										onBlur={() => setTimeout(() => setShowSuggestions(false), 120)}
+										onChange={(event) => {
+											const next = event.target.value.toUpperCase();
+											setShowSuggestions(true);
+											setSearchValue((prev) => ({ ...prev, stockCode: next }));
+										}}
+										onKeyDown={(event) => {
+											if (event.key === "Enter" && !isLoading) {
+												setShowSuggestions(false);
+												handleSearch();
+											}
+										}}
+										disabled={isLoading}
+									/>
+								</div>
 
 								{showSuggestions && filteredSuggestions.length > 0 && (
-									<div className="absolute z-20 mt-2 max-h-60 w-full overflow-auto rounded-md border border-border bg-background shadow-lg">
+									<div className="absolute z-50 mt-2 max-h-72 w-full overflow-auto rounded-lg border-2 border-primary/20 bg-background shadow-[var(--shadow-hover)] backdrop-blur-sm animate-scale-in">
 										<ul className="py-2">
-											{filteredSuggestions.map((stock) => (
-												<li key={stock.code}>
+											{filteredSuggestions.map((stock, index) => (
+												<li key={stock.code} style={{ animationDelay: `${index * 30}ms` }} className="animate-fade-in">
 													<button
 														type="button"
-														className="flex w-full items-center justify-between px-3 py-2 text-left text-sm hover:bg-muted"
+														className="flex w-full items-center justify-between px-4 py-3 text-left transition-colors hover:bg-primary/10 group"
 														onMouseDown={(event) => event.preventDefault()}
 														onClick={() => handleSuggestionSelect(stock.code)}
 													>
-														<span className="font-semibold text-foreground">{stock.code}</span>
-														<span className="text-xs text-muted-foreground">{stock.name}</span>
+														<span className="font-bold text-foreground group-hover:text-primary transition-colors">{stock.code}</span>
+														<span className="text-sm text-muted-foreground group-hover:text-foreground transition-colors">{stock.name}</span>
 													</button>
 												</li>
 											))}
@@ -345,7 +353,7 @@ export default function AnalyzePanel() {
 							<Input
 								type="text"
 								placeholder={t.analyze.searchPlaceholder_dates}
-								className="w-24 h-11"
+								className="w-full sm:w-28 h-12 border-2 focus:border-primary transition-colors text-center"
 								value={searchValue.days}
 								onChange={(event) =>
 									setSearchValue((prev) => ({ ...prev, days: event.target.value }))
@@ -358,7 +366,7 @@ export default function AnalyzePanel() {
 								onChange={(event) =>
 									setSearchValue((prev) => ({ ...prev, assetType: event.target.value }))
 								}
-								className="px-3 py-2 h-11 rounded-md border border-input bg-background text-foreground disabled:opacity-50 disabled:cursor-not-allowed"
+								className="px-4 py-2 h-12 rounded-md border-2 border-input focus:border-primary bg-background text-foreground font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer"
 								disabled={isLoading}
 							>
 								<option value="stock">{t.analyze.search_type_1}</option>
@@ -366,28 +374,32 @@ export default function AnalyzePanel() {
 							</select>
 						</div>
 						<Button
-							className="bg-primary hover:bg-primary/90 h-11 px-6"
+							className="h-12 px-8 bg-gradient-to-r from-primary to-primary-glow hover:opacity-90 shadow-[var(--shadow-glow)] transition-all duration-300 font-semibold"
 							onClick={handleSearch}
 							disabled={isLoading || !normalizedQuery}
 						>
-							<Search className="h-4 w-4 mr-2" />
+							<Search className="h-5 w-5 mr-2" />
 							{isLoading ? t.analyze.button.loading : t.analyze.button.search}
 						</Button>
 					</div>
 				</CardContent>
 			</Card>
 
+			{/* Progress Section */}
 			{status && progress < 100 && (
-				<Card className="shadow-md">
+				<Card className="border-primary/30 shadow-[var(--shadow-card)] animate-fade-in">
 					<CardContent className="pt-6">
-						<div className="space-y-3">
+						<div className="space-y-4">
 							<div className="flex items-center justify-between">
-								<p className="text-sm font-medium text-foreground">{status}</p>
-								<Badge variant="secondary">{progress}%</Badge>
+								<div className="flex items-center gap-3">
+									<div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
+									<p className="text-sm font-semibold text-foreground">{status}</p>
+								</div>
+								<Badge variant="secondary" className="text-sm font-bold px-3 py-1">{progress}%</Badge>
 							</div>
-							<div className="h-3 bg-muted rounded-full overflow-hidden">
+							<div className="relative h-3 bg-muted rounded-full overflow-hidden">
 								<div
-									className="h-full bg-gradient-to-r from-primary to-primary/80 transition-all duration-500 ease-out"
+									className="absolute inset-0 bg-gradient-to-r from-primary via-primary-glow to-accent transition-all duration-500 ease-out shadow-[var(--shadow-glow)]"
 									style={{ width: `${Math.min(progress, 100)}%` }}
 								/>
 							</div>
@@ -396,24 +408,34 @@ export default function AnalyzePanel() {
 				</Card>
 			)}
 
-			{chartData && <StockChart data={chartData} />}
+			{/* Chart Section */}
+			{chartData && (
+				<div className="animate-fade-in">
+					<StockChart data={chartData} />
+				</div>
+			)}
 
+			{/* Analysis Tabs Section */}
 			{tabsConfig.some((tab) => sections[tab.key]) && (
-				<Card className="shadow-lg">
+				<Card className="border-primary/20 shadow-[var(--shadow-card)] animate-fade-in">
 					<CardContent className="pt-6">
 						<Tabs defaultValue="technical" className="w-full">
-							<TabsList className="grid w-full grid-cols-6 mb-6">
+							<TabsList className="grid w-full grid-cols-3 md:grid-cols-6 gap-2 mb-8 h-auto p-2 bg-muted/50">
 								{tabsConfig.map(({ tabValue, icon: Icon, label }) => (
-									<TabsTrigger key={tabValue} value={tabValue} className="gap-2">
+									<TabsTrigger 
+										key={tabValue} 
+										value={tabValue} 
+										className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-primary-glow data-[state=active]:text-primary-foreground data-[state=active]:shadow-[var(--shadow-glow)] transition-all duration-300 py-3"
+									>
 										<Icon className="h-4 w-4" />
-										{label}
+										<span className="hidden sm:inline font-semibold">{label}</span>
 									</TabsTrigger>
 								))}
 							</TabsList>
 
 							{tabsConfig.map(({ tabValue, key }) => (
-								<TabsContent key={tabValue} value={tabValue} className="mt-0">
-									<div className="prose prose-slate dark:prose-invert max-w-none prose-headings:text-foreground prose-p:text-foreground prose-strong:text-foreground prose-li:text-foreground prose-table:text-foreground">
+								<TabsContent key={tabValue} value={tabValue} className="mt-0 animate-fade-in">
+									<div className="prose prose-slate dark:prose-invert max-w-none prose-headings:text-foreground prose-p:text-foreground prose-strong:text-foreground prose-li:text-foreground prose-table:text-foreground prose-headings:font-bold prose-h1:text-3xl prose-h2:text-2xl prose-h3:text-xl prose-a:text-primary prose-a:no-underline hover:prose-a:underline">
 										<ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
 											{sections[key] || t.analyze.noContent}
 										</ReactMarkdown>
