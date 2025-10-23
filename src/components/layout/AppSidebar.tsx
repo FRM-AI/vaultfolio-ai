@@ -20,7 +20,7 @@ export function AppSidebar() {
   const { t } = useLanguage();
 
   const items = [
-    { title: t.nav.analyze, url: '/analyze', icon: BarChart3 },
+    { title: t.nav.analyze, url: '/', icon: BarChart3 },
     { title: t.nav.optimize, url: '/optimize', icon: LineChart },
     // { title: t.nav.history, url: '/history', icon: History },
     { title: t.nav.settings, url: '/settings', icon: Settings },
