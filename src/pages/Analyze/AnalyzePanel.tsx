@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Search, BarChart3, Newspaper, FileText } from "lucide-react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -12,7 +12,49 @@ import { AnalyzeService } from "./Analyze.service";
 import { StockChart } from "@/components/StockChart";
 import { STOCK_SUGGESTIONS } from "@/constants/stocks";
 
-type SectionKey = "technical_analysis" | "news_analysis" | "proprietary_trading_analysis" |"foreign_trading_analysis" | "shareholder_trading_analysis" | "intraday_analysis";
+type SectionKey =
+	| "technical_analysis"
+	| "news_analysis"
+	| "proprietary_trading_analysis"
+	| "foreign_trading_analysis"
+	| "shareholder_trading_analysis"
+	| "intraday_analysis";
+
+type SectionState = Record<SectionKey, string>;
+
+type AnalyzeStreamEvent = {
+	type: string;
+	message?: string;
+	progress?: number;
+	section?: SectionKey;
+	text?: string;
+	[key: string]: unknown;
+};
+
+type AnalyzeStream = (
+	params: Record<string, unknown>,
+	init?: { signal?: AbortSignal }
+) => AsyncGenerator<AnalyzeStreamEvent>;
+
+const createEmptySections = (): SectionState => ({
+	technical_analysis: "",
+	news_analysis: "",
+	proprietary_trading_analysis: "",
+	foreign_trading_analysis: "",
+	shareholder_trading_analysis: "",
+	intraday_analysis: "",
+});
+
+const markdownComponents = {
+	table: (props) => (
+		<div className="overflow-x-auto my-6">
+			<table className="min-w-full divide-y divide-border border border-border rounded-lg" {...props} />
+		</div>
+	),
+	thead: (props) => <thead className="bg-muted/50" {...props} />,
+	th: (props) => <th className="px-4 py-3 text-left text-sm font-semibold text-foreground" {...props} />,
+	td: (props) => <td className="px-4 py-3 text-sm text-foreground border-t border-border" {...props} />,
+};
 
 const MAX_SUGGESTIONS = 6;
 
@@ -25,20 +67,14 @@ export default function AnalyzePanel() {
 	});
 	const [status, setStatus] = useState<string>("");
 	const [progress, setProgress] = useState<number>(0);
-	const [sections, setSections] = useState<Record<SectionKey, string>>({
-		technical_analysis: "",
-		news_analysis: "",
-		proprietary_trading_analysis: "",
-		foreign_trading_analysis: "",
-		shareholder_trading_analysis: "",
-		intraday_analysis: "",
-	});
+	const [sections, setSections] = useState<SectionState>(() => createEmptySections());
 	const [chartData, setChartData] = useState<any>(null);
 	const abortRef = useRef<AbortController | null>(null);
 	const [isLoading, setIsLoading] = useState<boolean>(false);
 	const [showSuggestions, setShowSuggestions] = useState<boolean>(false);
+	const activeSearchIdRef = useRef(0);
 
-	const normalizedQuery = searchValue.stockCode.trim().toUpperCase();
+	const normalizedQuery = useMemo(() => searchValue.stockCode.trim().toUpperCase(), [searchValue.stockCode]);
 
 	const filteredSuggestions = useMemo(() => {
 		if (!normalizedQuery) {
@@ -62,76 +98,184 @@ export default function AnalyzePanel() {
 		[t]
 	);
 
-	const handleStreaming = async (sectionKey: SectionKey, api: any) => {
-		const sectionLabel = sectionLabels[sectionKey] ?? "";
-		setStatus(t.analyze.status.analyzing.replace("{{section}}", sectionLabel));
-		abortRef.current?.abort();
-		const controller = new AbortController();
-		abortRef.current = controller;
-
-		const stream = api(
+	const tabsConfig = useMemo(
+		() => [
 			{
-				ticker: normalizedQuery,
-				look_back_days: Number.parseInt(searchValue.days || "30", 10),
+				key: "technical_analysis" as const,
+				tabValue: "technical",
+				icon: BarChart3,
+				label: t.analyze.tabs.technical,
 			},
-			{ signal: controller.signal }
-		);
+			{
+				key: "news_analysis" as const,
+				tabValue: "news",
+				icon: Newspaper,
+				label: t.analyze.tabs.news,
+			},
+			{
+				key: "proprietary_trading_analysis" as const,
+				tabValue: "proprietaryTrading",
+				icon: FileText,
+				label: t.analyze.tabs.proprietaryTrading,
+			},
+			{
+				key: "foreign_trading_analysis" as const,
+				tabValue: "foreignTrading",
+				icon: FileText,
+				label: t.analyze.tabs.foreignTrading,
+			},
+			{
+				key: "shareholder_trading_analysis" as const,
+				tabValue: "shareholderTrading",
+				icon: FileText,
+				label: t.analyze.tabs.shareholderTrading,
+			},
+			{
+				key: "intraday_analysis" as const,
+				tabValue: "intradayAnalysis",
+				icon: FileText,
+				label: t.analyze.tabs.intraday,
+			},
+		],
+		[t]
+	);
 
-		for await (const evt of stream) {
-			if (evt.type === "status") {
-				setStatus(evt.message ?? "");
-				if (typeof evt.progress === "number") setProgress(evt.progress);
-			}
+	const handleStreaming = useCallback(
+		async (sectionKey: SectionKey, stream: AnalyzeStream, payload: Record<string, unknown>) => {
+			const controller = new AbortController();
+			abortRef.current = controller;
+			const sectionLabel = sectionLabels[sectionKey] ?? "";
+			setStatus(t.analyze.status.analyzing.replace("{{section}}", sectionLabel));
 
-			if (evt.type === "content") {
-				const key = (evt.section as SectionKey) ?? sectionKey;
-				const text = evt.text ?? "";
-				setSections((prev) => ({ ...prev, [key]: (prev[key] || "") + text }));
-			}
+			try {
+				for await (const evt of stream(payload, { signal: controller.signal })) {
+					if (evt.type === "status") {
+						setStatus(evt.message ?? "");
+						if (typeof evt.progress === "number") {
+							setProgress(evt.progress);
+						}
+						continue;
+					}
 
-			if (evt.type === "complete") {
-				setProgress(evt.progress ?? 100);
-				setStatus(evt.message ?? t.analyze.status.complete);
+					if (evt.type === "content") {
+						const key = (evt.section as SectionKey) ?? sectionKey;
+						const text = typeof evt.text === "string" ? evt.text : "";
+						setSections((prev) => ({ ...prev, [key]: (prev[key] || "") + text }));
+						continue;
+					}
+
+					if (evt.type === "complete") {
+						setProgress(evt.progress ?? 100);
+						setStatus(evt.message ?? t.analyze.status.complete);
+					}
+				}
+			} catch (error) {
+				const isAbortError =
+					error instanceof DOMException
+						? error.name === "AbortError"
+						: (error as { name?: string } | null)?.name === "AbortError";
+
+				if (!isAbortError) {
+					throw error;
+				}
+			} finally {
+				if (abortRef.current === controller) {
+					abortRef.current = null;
+				}
 			}
+		},
+		[sectionLabels, t]
+	);
+
+	const handleSearch = useCallback(async () => {
+		if (!normalizedQuery) {
+			return;
 		}
-	};
 
-	const handleSearch = async () => {
-		if (!normalizedQuery) return;
+		const requestId = activeSearchIdRef.current + 1;
+		activeSearchIdRef.current = requestId;
 
+		abortRef.current?.abort();
+		abortRef.current = null;
 		setShowSuggestions(false);
 		setIsLoading(true);
-		setStatus(t.analyze.status.loadingChart);
 		setProgress(0);
-		setSections({ 
-			technical_analysis: "", 
-			news_analysis: "", 
-			proprietary_trading_analysis: "", 
-			foreign_trading_analysis: "", 
-			shareholder_trading_analysis: "",
-			intraday_analysis: ""
-		});
+		setSections(createEmptySections());
 		setChartData(null);
 
+		const parsedDays = Number.parseInt(searchValue.days, 10);
+		const lookBackDays = Number.isNaN(parsedDays) || parsedDays <= 0 ? 30 : parsedDays;
+		setStatus(t.analyze.status.loadingChart);
+
 		try {
-			setStatus(t.analyze.status.loadingChart);
 			const response = await AnalyzeService.chartData(normalizedQuery, searchValue.assetType);
 			if (response) {
 				setChartData(response);
 			}
-			await handleStreaming("intraday_analysis", AnalyzeService.intradayMatchAnalysisStream);
-			await handleStreaming("shareholder_trading_analysis", AnalyzeService.shareholderTradingAnalysisStream);
-			await handleStreaming("foreign_trading_analysis", AnalyzeService.foreignTradingAnalysisStream);
-			await handleStreaming("proprietary_trading_analysis", AnalyzeService.proprietaryTradingAnalysisStream);
-			await handleStreaming("technical_analysis", AnalyzeService.technicalAnalysisStream);
-			await handleStreaming("news_analysis", AnalyzeService.newsAnalysisStream);
+
+			const streamingSteps: Array<{
+				key: SectionKey;
+				stream: AnalyzeStream;
+				payload: Record<string, unknown>;
+			}> = [
+				{
+					key: "intraday_analysis",
+					stream: AnalyzeService.intradayMatchAnalysisStream,
+					payload: { ticker: normalizedQuery },
+				},
+				{
+					key: "shareholder_trading_analysis",
+					stream: AnalyzeService.shareholderTradingAnalysisStream,
+					payload: { ticker: normalizedQuery },
+				},
+				{
+					key: "foreign_trading_analysis",
+					stream: AnalyzeService.foreignTradingAnalysisStream,
+					payload: { ticker: normalizedQuery },
+				},
+				{
+					key: "proprietary_trading_analysis",
+					stream: AnalyzeService.proprietaryTradingAnalysisStream,
+					payload: { ticker: normalizedQuery },
+				},
+				{
+					key: "technical_analysis",
+					stream: AnalyzeService.technicalAnalysisStream,
+					payload: {
+						ticker: normalizedQuery,
+						asset_type: searchValue.assetType,
+					},
+				},
+				{
+					key: "news_analysis",
+					stream: AnalyzeService.newsAnalysisStream,
+					payload: {
+						ticker: normalizedQuery,
+						asset_type: searchValue.assetType,
+						look_back_days: lookBackDays,
+					},
+				},
+			];
+
+			for (const step of streamingSteps) {
+				await handleStreaming(step.key, step.stream, step.payload);
+			}
 		} catch (error) {
-			console.error(error);
-			setStatus(t.analyze.status.error);
+			const isAbortError =
+				error instanceof DOMException
+					? error.name === "AbortError"
+					: (error as { name?: string } | null)?.name === "AbortError";
+
+			if (!isAbortError) {
+				console.error(error);
+				setStatus(t.analyze.status.error);
+			}
 		} finally {
-			setIsLoading(false);
+			if (activeSearchIdRef.current === requestId) {
+				setIsLoading(false);
+			}
 		}
-	};
+	}, [handleStreaming, normalizedQuery, searchValue.assetType, searchValue.days, t]);
 
 	useEffect(() => {
 		return () => {
@@ -139,10 +283,10 @@ export default function AnalyzePanel() {
 		};
 	}, []);
 
-	const handleSuggestionSelect = (code: string) => {
+	const handleSuggestionSelect = useCallback((code: string) => {
 		setSearchValue((prev) => ({ ...prev, stockCode: code }));
 		setShowSuggestions(false);
-	};
+	}, []);
 
 	return (
 		<div className="space-y-6">
@@ -159,15 +303,15 @@ export default function AnalyzePanel() {
 								<Input
 									type="text"
 									placeholder={t.analyze.searchPlaceholder}
-													className="h-11 w-full"
+									className="h-11 w-full"
 									value={searchValue.stockCode}
 									onFocus={() => setShowSuggestions(true)}
 									onBlur={() => setTimeout(() => setShowSuggestions(false), 120)}
-													onChange={(event) => {
-														const next = event.target.value.toUpperCase();
-														setShowSuggestions(true);
-														setSearchValue((prev) => ({ ...prev, stockCode: next }));
-													}}
+									onChange={(event) => {
+										const next = event.target.value.toUpperCase();
+										setShowSuggestions(true);
+										setSearchValue((prev) => ({ ...prev, stockCode: next }));
+									}}
 									onKeyDown={(event) => {
 										if (event.key === "Enter" && !isLoading) {
 											setShowSuggestions(false);
@@ -203,13 +347,17 @@ export default function AnalyzePanel() {
 								placeholder={t.analyze.searchPlaceholder_dates}
 								className="w-24 h-11"
 								value={searchValue.days}
-								onChange={(event) => setSearchValue({ ...searchValue, days: event.target.value })}
+								onChange={(event) =>
+									setSearchValue((prev) => ({ ...prev, days: event.target.value }))
+								}
 								onKeyDown={(event) => event.key === "Enter" && !isLoading && handleSearch()}
 								disabled={isLoading}
 							/>
 							<select
 								value={searchValue.assetType}
-								onChange={(event) => setSearchValue({ ...searchValue, assetType: event.target.value })}
+								onChange={(event) =>
+									setSearchValue((prev) => ({ ...prev, assetType: event.target.value }))
+								}
 								className="px-3 py-2 h-11 rounded-md border border-input bg-background text-foreground disabled:opacity-50 disabled:cursor-not-allowed"
 								disabled={isLoading}
 							>
@@ -250,177 +398,28 @@ export default function AnalyzePanel() {
 
 			{chartData && <StockChart data={chartData} />}
 
-			{(sections.technical_analysis || sections.news_analysis || sections.proprietary_trading_analysis || sections.foreign_trading_analysis || sections.shareholder_trading_analysis) && (
+			{tabsConfig.some((tab) => sections[tab.key]) && (
 				<Card className="shadow-lg">
 					<CardContent className="pt-6">
 						<Tabs defaultValue="technical" className="w-full">
 							<TabsList className="grid w-full grid-cols-6 mb-6">
-								<TabsTrigger value="technical" className="gap-2">
-									<BarChart3 className="h-4 w-4" />
-									{t.analyze.tabs.technical}
-								</TabsTrigger>
-								<TabsTrigger value="news" className="gap-2">
-									<Newspaper className="h-4 w-4" />
-									{t.analyze.tabs.news}
-								</TabsTrigger>
-								<TabsTrigger value="proprietaryTrading" className="gap-2">
-									<FileText className="h-4 w-4" />
-									{t.analyze.tabs.proprietaryTrading}
-								</TabsTrigger>
-								<TabsTrigger value="foreignTrading" className="gap-2">
-									<FileText className="h-4 w-4" />
-									{t.analyze.tabs.foreignTrading}
-								</TabsTrigger>
-								<TabsTrigger value="shareholderTrading" className="gap-2">
-									<FileText className="h-4 w-4" />
-									{t.analyze.tabs.shareholderTrading}
-								</TabsTrigger>
-								<TabsTrigger value="intradayAnalysis" className="gap-2">
-									<FileText className="h-4 w-4" />
-									{t.analyze.tabs.intraday}
-								</TabsTrigger>
+								{tabsConfig.map(({ tabValue, icon: Icon, label }) => (
+									<TabsTrigger key={tabValue} value={tabValue} className="gap-2">
+										<Icon className="h-4 w-4" />
+										{label}
+									</TabsTrigger>
+								))}
 							</TabsList>
 
-							<TabsContent value="technical" className="mt-0">
-								<div className="prose prose-slate dark:prose-invert max-w-none prose-headings:text-foreground prose-p:text-foreground prose-strong:text-foreground prose-li:text-foreground prose-table:text-foreground">
-									<ReactMarkdown
-										remarkPlugins={[remarkGfm]}
-										components={{
-											table: ({ node, ...props }) => (
-												<div className="overflow-x-auto my-6">
-													<table className="min-w-full divide-y divide-border border border-border rounded-lg" {...props} />
-												</div>
-											),
-											thead: ({ node, ...props }) => <thead className="bg-muted/50" {...props} />,
-											th: ({ node, ...props }) => (
-												<th className="px-4 py-3 text-left text-sm font-semibold text-foreground" {...props} />
-											),
-											td: ({ node, ...props }) => (
-												<td className="px-4 py-3 text-sm text-foreground border-t border-border" {...props} />
-											),
-										}}
-									>
-										{sections.technical_analysis || t.analyze.noContent}
-									</ReactMarkdown>
-								</div>
-							</TabsContent>
-
-							<TabsContent value="news" className="mt-0">
-								<div className="prose prose-slate dark:prose-invert max-w-none prose-headings:text-foreground prose-p:text-foreground prose-strong:text-foreground prose-li:text-foreground prose-table:text-foreground">
-									<ReactMarkdown
-										remarkPlugins={[remarkGfm]}
-										components={{
-											table: ({ node, ...props }) => (
-												<div className="overflow-x-auto my-6">
-													<table className="min-w-full divide-y divide-border border border-border rounded-lg" {...props} />
-												</div>
-											),
-											thead: ({ node, ...props }) => <thead className="bg-muted/50" {...props} />,
-											th: ({ node, ...props }) => (
-												<th className="px-4 py-3 text-left text-sm font-semibold text-foreground" {...props} />
-											),
-											td: ({ node, ...props }) => (
-												<td className="px-4 py-3 text-sm text-foreground border-t border-border" {...props} />
-											),
-										}}
-									>
-										{sections.news_analysis || t.analyze.noContent}
-									</ReactMarkdown>
-								</div>
-							</TabsContent>
-
-							<TabsContent value="proprietaryTrading" className="mt-0">
-								<div className="prose prose-slate dark:prose-invert max-w-none prose-headings:text-foreground prose-p:text-foreground prose-strong:text-foreground prose-li:text-foreground prose-table:text-foreground">
-									<ReactMarkdown
-										remarkPlugins={[remarkGfm]}
-										components={{
-											table: ({ node, ...props }) => (
-												<div className="overflow-x-auto my-6">
-													<table className="min-w-full divide-y divide-border border border-border rounded-lg" {...props} />
-												</div>
-											),
-											thead: ({ node, ...props }) => <thead className="bg-muted/50" {...props} />,
-											th: ({ node, ...props }) => (
-												<th className="px-4 py-3 text-left text-sm font-semibold text-foreground" {...props} />
-											),
-											td: ({ node, ...props }) => (
-												<td className="px-4 py-3 text-sm text-foreground border-t border-border" {...props} />
-											),
-										}}
-									>
-										{sections.proprietary_trading_analysis || t.analyze.noContent}
-									</ReactMarkdown>
-								</div>
-							</TabsContent>
-							<TabsContent value="foreignTrading" className="mt-0">
-								<div className="prose prose-slate dark:prose-invert max-w-none prose-headings:text-foreground prose-p:text-foreground prose-strong:text-foreground prose-li:text-foreground prose-table:text-foreground">
-									<ReactMarkdown
-										remarkPlugins={[remarkGfm]}
-										components={{
-											table: ({ node, ...props }) => (
-												<div className="overflow-x-auto my-6">
-													<table className="min-w-full divide-y divide-border border border-border rounded-lg" {...props} />
-												</div>
-											),
-											thead: ({ node, ...props }) => <thead className="bg-muted/50" {...props} />,
-											th: ({ node, ...props }) => (
-												<th className="px-4 py-3 text-left text-sm font-semibold text-foreground" {...props} />
-											),
-											td: ({ node, ...props }) => (
-												<td className="px-4 py-3 text-sm text-foreground border-t border-border" {...props} />
-											),
-										}}
-									>
-										{sections.foreign_trading_analysis || t.analyze.noContent}
-									</ReactMarkdown>
-								</div>
-							</TabsContent>
-							<TabsContent value="shareholderTrading" className="mt-0">
-								<div className="prose prose-slate dark:prose-invert max-w-none prose-headings:text-foreground prose-p:text-foreground prose-strong:text-foreground prose-li:text-foreground prose-table:text-foreground">
-									<ReactMarkdown
-										remarkPlugins={[remarkGfm]}
-										components={{
-											table: ({ node, ...props }) => (
-												<div className="overflow-x-auto my-6">
-													<table className="min-w-full divide-y divide-border border border-border rounded-lg" {...props} />
-												</div>
-											),
-											thead: ({ node, ...props }) => <thead className="bg-muted/50" {...props} />,
-											th: ({ node, ...props }) => (
-												<th className="px-4 py-3 text-left text-sm font-semibold text-foreground" {...props} />
-											),
-											td: ({ node, ...props }) => (
-												<td className="px-4 py-3 text-sm text-foreground border-t border-border" {...props} />
-											),
-										}}
-									>
-										{sections.shareholder_trading_analysis || t.analyze.noContent}
-									</ReactMarkdown>
-								</div>
-							</TabsContent>
-							<TabsContent value="intradayAnalysis" className="mt-0">
-								<div className="prose prose-slate dark:prose-invert max-w-none prose-headings:text-foreground prose-p:text-foreground prose-strong:text-foreground prose-li:text-foreground prose-table:text-foreground">
-									<ReactMarkdown
-										remarkPlugins={[remarkGfm]}
-										components={{
-											table: ({ node, ...props }) => (
-												<div className="overflow-x-auto my-6">
-													<table className="min-w-full divide-y divide-border border border-border rounded-lg" {...props} />
-												</div>
-											),
-											thead: ({ node, ...props }) => <thead className="bg-muted/50" {...props} />,
-											th: ({ node, ...props }) => (
-												<th className="px-4 py-3 text-left text-sm font-semibold text-foreground" {...props} />
-											),
-											td: ({ node, ...props }) => (
-												<td className="px-4 py-3 text-sm text-foreground border-t border-border" {...props} />
-											),
-										}}
-									>
-										{sections.intraday_analysis || t.analyze.noContent}
-									</ReactMarkdown>
-								</div>
-							</TabsContent>
+							{tabsConfig.map(({ tabValue, key }) => (
+								<TabsContent key={tabValue} value={tabValue} className="mt-0">
+									<div className="prose prose-slate dark:prose-invert max-w-none prose-headings:text-foreground prose-p:text-foreground prose-strong:text-foreground prose-li:text-foreground prose-table:text-foreground">
+										<ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
+											{sections[key] || t.analyze.noContent}
+										</ReactMarkdown>
+									</div>
+								</TabsContent>
+							))}
 						</Tabs>
 					</CardContent>
 				</Card>
