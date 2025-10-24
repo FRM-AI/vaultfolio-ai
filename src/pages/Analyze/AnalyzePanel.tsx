@@ -93,19 +93,51 @@ export default function AnalyzePanel() {
 	}, [CRYPTO_CODES, STOCK_CODES, normalizedQuery, searchValue.assetType]);
 
 	const filteredSuggestions = useMemo(() => {
+		// Crypto: simple prefix match on code
 		if (searchValue.assetType === "crypto") {
 			const list = CryptoSupportInfo.map((code) => ({ code, name: code }));
 			if (!normalizedQuery) return list.slice(0, MAX_SUGGESTIONS);
-			return list.filter((item) => item.code.startsWith(normalizedQuery)).slice(0, MAX_SUGGESTIONS);
+			return list
+				.filter((item) => item.code.toUpperCase().startsWith(normalizedQuery))
+				.slice(0, MAX_SUGGESTIONS);
 		}
 
+		// Stocks: prioritize by relevance
 		if (!normalizedQuery) {
 			return STOCK_SUGGESTIONS.slice(0, MAX_SUGGESTIONS);
 		}
 
-		return STOCK_SUGGESTIONS.filter((stock) =>
-			stock.code.startsWith(normalizedQuery) || stock.name.toUpperCase().includes(normalizedQuery)
-		).slice(0, MAX_SUGGESTIONS);
+		const q = normalizedQuery;
+		const shortQuery = q.length <= 2; // avoid noisy name matches for very short queries
+
+		const startsWith: typeof STOCK_SUGGESTIONS = [] as any;
+		const codeContains: typeof STOCK_SUGGESTIONS = [] as any;
+		const nameContains: typeof STOCK_SUGGESTIONS = [] as any;
+
+		for (const s of STOCK_SUGGESTIONS) {
+			const code = s.code.toUpperCase();
+			const name = s.name.toUpperCase();
+			if (code.startsWith(q)) startsWith.push(s);
+			else if (!shortQuery && code.includes(q)) codeContains.push(s);
+			else if (!shortQuery && name.includes(q)) nameContains.push(s);
+		}
+
+		const sortByCode = (a: { code: string }, b: { code: string }) => a.code.localeCompare(b.code);
+		startsWith.sort(sortByCode);
+		codeContains.sort(sortByCode);
+		nameContains.sort(sortByCode);
+
+		const merged = [...startsWith, ...codeContains, ...nameContains];
+		const seen = new Set<string>();
+		const result: typeof STOCK_SUGGESTIONS = [] as any;
+		for (const s of merged) {
+			if (seen.has(s.code)) continue;
+			seen.add(s.code);
+			result.push(s);
+			if (result.length >= MAX_SUGGESTIONS) break;
+		}
+
+		return result;
 	}, [normalizedQuery, searchValue.assetType]);
 
 	const sectionLabels = useMemo<Record<SectionKey, string>>(
@@ -402,12 +434,6 @@ export default function AnalyzePanel() {
 										disabled={isLoading}
 									/>
 
-									{/* Invalid symbol hint */}
-									{normalizedQuery && !isAllowedSymbol && (
-										<p className="mt-1 text-xs text-destructive">
-											{t.chart?.errors?.invalidSymbol ?? "Vui lòng nhập mã hợp lệ"}
-										</p>
-									)}
 								</div>
 
 								{showSuggestions && filteredSuggestions.length > 0 && (
