@@ -1,9 +1,4 @@
-export interface StockSuggestion {
-  code: string;
-  name: string;
-}
-
-export const STOCK_SUGGESTIONS: StockSuggestion[] = [
+[
     {
         "code": "AAA",
         "name": "Công ty Cổ phần Nhựa An Phát Xanh"

@@ -6,8 +6,6 @@ const apiClient = new APIClient();
 
 const optimize = (data: {
   symbols: string[];
-  start_date: string;
-  end_date: string;
   investment_amount: number;
 }) => apiClient.create(BASE_URL, data);
 

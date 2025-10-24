@@ -11,6 +11,7 @@ import remarkGfm from "remark-gfm";
 import { AnalyzeService } from "./Analyze.service";
 import { StockChart } from "@/components/StockChart";
 import { STOCK_SUGGESTIONS } from "@/constants/stocks";
+import { CryptoSupportInfo } from "@/constants/crypto";
 
 type SectionKey =
 	| "technical_analysis"
@@ -83,7 +84,21 @@ export default function AnalyzePanel() {
 
 	const normalizedQuery = useMemo(() => searchValue.stockCode.trim().toUpperCase(), [searchValue.stockCode]);
 
+	const STOCK_CODES = useMemo(() => new Set(STOCK_SUGGESTIONS.map((s) => s.code.toUpperCase())), []);
+	const CRYPTO_CODES = useMemo(() => new Set(CryptoSupportInfo.map((c) => c.toUpperCase())), []);
+
+	const isAllowedSymbol = useMemo(() => {
+		if (!normalizedQuery) return false;
+		return searchValue.assetType === "crypto" ? CRYPTO_CODES.has(normalizedQuery) : STOCK_CODES.has(normalizedQuery);
+	}, [CRYPTO_CODES, STOCK_CODES, normalizedQuery, searchValue.assetType]);
+
 	const filteredSuggestions = useMemo(() => {
+		if (searchValue.assetType === "crypto") {
+			const list = CryptoSupportInfo.map((code) => ({ code, name: code }));
+			if (!normalizedQuery) return list.slice(0, MAX_SUGGESTIONS);
+			return list.filter((item) => item.code.startsWith(normalizedQuery)).slice(0, MAX_SUGGESTIONS);
+		}
+
 		if (!normalizedQuery) {
 			return STOCK_SUGGESTIONS.slice(0, MAX_SUGGESTIONS);
 		}
@@ -91,7 +106,7 @@ export default function AnalyzePanel() {
 		return STOCK_SUGGESTIONS.filter((stock) =>
 			stock.code.startsWith(normalizedQuery) || stock.name.toUpperCase().includes(normalizedQuery)
 		).slice(0, MAX_SUGGESTIONS);
-	}, [normalizedQuery]);
+	}, [normalizedQuery, searchValue.assetType]);
 
 	const sectionLabels = useMemo<Record<SectionKey, string>>(
 		() => ({
@@ -263,49 +278,59 @@ export default function AnalyzePanel() {
 				setChartData(response);
 			}
 
-			const streamingSteps: Array<{
+			let streamingSteps: Array<{
 				key: SectionKey;
 				stream: AnalyzeStream;
 				payload: Record<string, unknown>;
-			}> = [
-				{
-					key: "proprietary_trading_analysis",
-					stream: AnalyzeService.proprietaryTradingAnalysisStream,
-					payload: { ticker: normalizedQuery },
-				},
-				{
-					key: "intraday_analysis",
-					stream: AnalyzeService.intradayMatchAnalysisStream,
-					payload: { ticker: normalizedQuery },
-				},
-				{
-					key: "shareholder_trading_analysis",
-					stream: AnalyzeService.shareholderTradingAnalysisStream,
-					payload: { ticker: normalizedQuery },
-				},
-				{
-					key: "foreign_trading_analysis",
-					stream: AnalyzeService.foreignTradingAnalysisStream,
-					payload: { ticker: normalizedQuery },
-				},
-				{
-					key: "technical_analysis",
-					stream: AnalyzeService.technicalAnalysisStream,
-					payload: {
-						ticker: normalizedQuery,
-						asset_type: searchValue.assetType,
+			}>;
+
+			if (searchValue.assetType === "crypto") {
+				streamingSteps = [
+					{
+						key: "technical_analysis",
+						stream: AnalyzeService.technicalAnalysisStream,
+						payload: { ticker: normalizedQuery, asset_type: searchValue.assetType },
 					},
-				},
-				{
-					key: "news_analysis",
-					stream: AnalyzeService.newsAnalysisStream,
-					payload: {
-						ticker: normalizedQuery,
-						asset_type: searchValue.assetType,
-						look_back_days: lookBackDays,
+					{
+						key: "news_analysis",
+						stream: AnalyzeService.newsAnalysisStream,
+						payload: { ticker: normalizedQuery, asset_type: searchValue.assetType, look_back_days: lookBackDays },
 					},
-				},
-			];
+				];
+			} else {
+				streamingSteps = [
+					{
+						key: "proprietary_trading_analysis",
+						stream: AnalyzeService.proprietaryTradingAnalysisStream,
+						payload: { ticker: normalizedQuery },
+					},
+					{
+						key: "intraday_analysis",
+						stream: AnalyzeService.intradayMatchAnalysisStream,
+						payload: { ticker: normalizedQuery },
+					},
+					{
+						key: "shareholder_trading_analysis",
+						stream: AnalyzeService.shareholderTradingAnalysisStream,
+						payload: { ticker: normalizedQuery },
+					},
+					{
+						key: "foreign_trading_analysis",
+						stream: AnalyzeService.foreignTradingAnalysisStream,
+						payload: { ticker: normalizedQuery },
+					},
+					{
+						key: "technical_analysis",
+						stream: AnalyzeService.technicalAnalysisStream,
+						payload: { ticker: normalizedQuery, asset_type: searchValue.assetType },
+					},
+					{
+						key: "news_analysis",
+						stream: AnalyzeService.newsAnalysisStream,
+						payload: { ticker: normalizedQuery, asset_type: searchValue.assetType, look_back_days: lookBackDays },
+					},
+				];
+			}
 
 			for (const step of streamingSteps) {
 				await handleStreaming(step.key, step.stream, step.payload);
@@ -369,13 +394,20 @@ export default function AnalyzePanel() {
 											setSearchValue((prev) => ({ ...prev, stockCode: next }));
 										}}
 										onKeyDown={(event) => {
-											if (event.key === "Enter" && !isLoading) {
+											if (event.key === "Enter" && !isLoading && isAllowedSymbol) {
 												setShowSuggestions(false);
 												handleSearch();
 											}
 										}}
 										disabled={isLoading}
 									/>
+
+									{/* Invalid symbol hint */}
+									{normalizedQuery && !isAllowedSymbol && (
+										<p className="mt-1 text-xs text-destructive">
+											{t.chart?.errors?.invalidSymbol ?? "Vui lòng nhập mã hợp lệ"}
+										</p>
+									)}
 								</div>
 
 								{showSuggestions && filteredSuggestions.length > 0 && (
@@ -425,7 +457,7 @@ export default function AnalyzePanel() {
 						<Button
 							className="h-12 px-8 bg-gradient-to-r from-primary to-primary-glow hover:opacity-90 shadow-[var(--shadow-glow)] transition-all duration-300 font-semibold"
 							onClick={handleSearch}
-							disabled={isLoading || !normalizedQuery}
+							disabled={isLoading || !normalizedQuery || !isAllowedSymbol}
 						>
 							<Search className="h-5 w-5 mr-2" />
 							{isLoading ? t.analyze.button.loading : t.analyze.button.search}

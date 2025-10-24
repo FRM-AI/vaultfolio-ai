@@ -4,6 +4,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Lock, Mail } from 'lucide-react';
 import AuthService from './Auth.service';
@@ -12,6 +13,7 @@ const Login = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [acceptTerms, setAcceptTerms] = useState(false);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -72,9 +74,35 @@ const Login = () => {
                 />
               </div>
             </div>
+
+            {/* Terms of Service consent */}
+            <div className="space-y-2">
+              <div className="flex items-start gap-3">
+                <Checkbox
+                  id="acceptTerms"
+                  checked={acceptTerms}
+                  onCheckedChange={(checked) => setAcceptTerms(!!checked)}
+                  aria-label="accept terms"
+                />
+                <Label htmlFor="acceptTerms" className="text-sm font-medium">
+                  Tôi đồng ý với Điều khoản Dịch vụ
+                </Label>
+              </div>
+              <div className="text-xs text-muted-foreground p-3 bg-muted/50 rounded-md border border-warning/20">
+                <div className="space-y-2">
+                  <p className="font-medium text-warning">⚠️ Thông báo quan trọng:</p>
+                  <ul className="space-y-1 list-disc list-inside">
+                    <li>Khi chọn vào đây và đồng ý với các điều khoản thì bên phát hành sản phẩm không chịu trách nhiệm cho bất kỳ vấn đề phát sinh.</li>
+                    <li>Kết quả phân tích chỉ mang tính chất TƯ VẤN từ dữ liệu lịch sử.</li>
+                    <li>Cá nhân nhà đầu tư chịu trách nhiệm để đưa ra quyết định đầu tư thực tế.</li>
+                    <li>Sản phẩm hiện chỉ là bản THỬ NGHIỆM có thể được cập nhật hoặc thay đổi.</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
           </CardContent>
           <CardFooter className="flex flex-col space-y-4">
-            <Button type="submit" className="w-full" size="lg">
+            <Button type="submit" className="w-full" size="lg" disabled={!acceptTerms}>
               {t.login.loginButton}
             </Button>
             <p className="text-sm text-center text-muted-foreground">

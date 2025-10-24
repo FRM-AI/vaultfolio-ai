@@ -127,7 +127,32 @@
     "currentPortfolio": "Current Portfolio",
     "suggestion": "Optimization Suggestion",
     "riskLevel": "Risk Level",
-    "expectedReturn": "Expected Return"
+    "expectedReturn": "Expected Return",
+    "form": {
+      "symbolsLabel": "Symbols",
+      "symbolPlaceholder": "e.g., VCB, BID, CTG...",
+      "addSymbol": "Add symbol",
+      "startDateLabel": "Start date",
+      "endDateLabel": "End date",
+      "amountLabel": "Investment amount (VND)",
+      "amountPlaceholder": "e.g., 1000000000",
+      "submit": "Optimize portfolio",
+      "loading": "Optimizing..."
+    },
+    "result": {
+      "allocationTitle": "Optimal allocation",
+      "allocationDescription": "Suggested weight for each symbol",
+      "qtyLabel": "Quantity",
+      "priceLabel": "Price",
+      "estValueLabel": "Estimated value",
+      "totalInvestment": "Total investment",
+      "leftover": "Leftover cash",
+      "metricsTitle": "Optimization results",
+      "metricsDesc": "Projected portfolio performance",
+      "expectedReturn": "Expected return",
+      "risk": "Risk",
+      "sharpeRatio": "Sharpe Ratio"
+    }
   },
   "history": {
     "title": "Transaction History",

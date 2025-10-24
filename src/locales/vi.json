@@ -127,7 +127,32 @@
     "currentPortfolio": "Danh mục hiện tại",
     "suggestion": "Gợi ý tối ưu",
     "riskLevel": "Mức rủi ro",
-    "expectedReturn": "Lợi nhuận kỳ vọng"
+    "expectedReturn": "Lợi nhuận kỳ vọng",
+    "form": {
+      "symbolsLabel": "Mã cổ phiếu",
+      "symbolPlaceholder": "VD: VCB, BID, CTG...",
+      "addSymbol": "Thêm mã cổ phiếu",
+      "startDateLabel": "Ngày bắt đầu",
+      "endDateLabel": "Ngày kết thúc",
+      "amountLabel": "Số tiền đầu tư (VND)",
+      "amountPlaceholder": "VD: 1000000000",
+      "submit": "Tối ưu hóa danh mục",
+      "loading": "Đang tối ưu hóa..."
+    },
+    "result": {
+      "allocationTitle": "Phân bổ tối ưu",
+      "allocationDescription": "Tỷ trọng đề xuất cho từng mã",
+      "qtyLabel": "Số lượng",
+      "priceLabel": "Giá",
+      "estValueLabel": "Giá trị ước tính",
+      "totalInvestment": "Tổng vốn",
+      "leftover": "Tiền thừa",
+      "metricsTitle": "Kết quả tối ưu",
+      "metricsDesc": "Hiệu suất danh mục dự kiến",
+      "expectedReturn": "Lợi nhuận kỳ vọng",
+      "risk": "Rủi ro",
+      "sharpeRatio": "Sharpe Ratio"
+    }
   },
   "history": {
     "title": "Lịch sử giao dịch",
