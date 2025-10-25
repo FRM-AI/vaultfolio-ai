@@ -568,33 +568,33 @@ export default function AnalyzePanel() {
 								)}
 							</div>
 
-								<select
-									value={searchValue.analysisTarget}
-									onChange={(event) =>
-										setSearchValue((prev) => ({ ...prev, analysisTarget: event.target.value as AnalysisSelection }))
-									}
-									className="w-full sm:w-44 h-12 rounded-md border-2 border-input focus:border-primary bg-background text-foreground font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer"
-									disabled={isLoading}
-									aria-label={t.analyze.serviceFilter.label}
-								>
-									{analysisOptions.map((option) => (
-										<option key={option.value} value={option.value}>
-											{option.label}
-										</option>
-									))}
-								</select>
 							<select
-								value={searchValue.assetType}
-									onChange={(event) => {
-										const nextAssetType = event.target.value as "stock" | "crypto";
-										setSearchValue((prev) => ({ ...prev, assetType: nextAssetType }));
-									}}
-								className="px-4 py-2 h-12 rounded-md border-2 border-input focus:border-primary bg-background text-foreground font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer"
+								value={searchValue.analysisTarget}
+								onChange={(event) =>
+									setSearchValue((prev) => ({ ...prev, analysisTarget: event.target.value as AnalysisSelection }))
+								}
+								className="w-full sm:w-44 h-12 rounded-lg border-2 border-primary/20 focus:border-primary bg-background hover:bg-muted/30 text-foreground font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-all cursor-pointer shadow-sm focus:shadow-[var(--shadow-hover)] px-3"
 								disabled={isLoading}
+								aria-label={t.analyze.serviceFilter.label}
 							>
-								<option value="stock">{t.analyze.search_type_1}</option>
-								<option value="crypto">{t.analyze.search_type_2}</option>
+								{analysisOptions.map((option) => (
+									<option key={option.value} value={option.value}>
+										{option.label}
+									</option>
+								))}
 							</select>
+						<select
+							value={searchValue.assetType}
+								onChange={(event) => {
+									const nextAssetType = event.target.value as "stock" | "crypto";
+									setSearchValue((prev) => ({ ...prev, assetType: nextAssetType }));
+								}}
+							className="w-full sm:w-40 h-12 rounded-lg border-2 border-primary/20 focus:border-primary bg-background hover:bg-muted/30 text-foreground font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-all cursor-pointer shadow-sm focus:shadow-[var(--shadow-hover)] px-3"
+							disabled={isLoading}
+						>
+							<option value="stock">{t.analyze.search_type_1}</option>
+							<option value="crypto">{t.analyze.search_type_2}</option>
+						</select>
 						</div>
 						<Button
 							className="h-12 px-8 bg-gradient-to-r from-primary to-primary-glow hover:opacity-90 shadow-[var(--shadow-glow)] transition-all duration-300 font-semibold"
@@ -643,15 +643,15 @@ export default function AnalyzePanel() {
 				<Card className="border-primary/20 shadow-[var(--shadow-card)] animate-fade-in">
 					<CardContent className="pt-6">
 						<Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-							<TabsList className="grid w-full grid-cols-3 md:grid-cols-6 gap-2 mb-8 h-auto p-2 bg-muted/50">
+							<TabsList className="grid w-full grid-cols-3 md:grid-cols-6 gap-2 mb-8 h-auto p-3 bg-background/50 backdrop-blur-sm rounded-xl border-2 border-primary/20 shadow-[var(--shadow-card)]">
 								{availableTabs.map(({ tabValue, icon: Icon, label }) => (
 									<TabsTrigger
 										key={tabValue}
 										value={tabValue}
-										className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-primary-glow data-[state=active]:text-primary-foreground data-[state=active]:shadow-[var(--shadow-glow)] transition-all duration-300 py-3"
+										className="flex items-center gap-2 px-4 py-3 rounded-lg transition-all border border-transparent data-[state=active]:border-primary/30 data-[state=active]:bg-primary/5 data-[state=active]:text-primary data-[state=active]:font-semibold hover:bg-muted/50"
 									>
 										<Icon className="h-4 w-4" />
-										<span className="hidden sm:inline font-semibold">{label}</span>
+										<span className="hidden sm:inline font-medium">{label}</span>
 									</TabsTrigger>
 								))}
 							</TabsList>
