@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Search, BarChart3, Newspaper, FileText } from "lucide-react";
+import { Search, BarChart3, Newspaper, FileText, ChevronDown } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useLanguage } from "@/contexts/LanguageContext";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -568,33 +569,53 @@ export default function AnalyzePanel() {
 								)}
 							</div>
 
-							<select
+							<Select
 								value={searchValue.analysisTarget}
-								onChange={(event) =>
-									setSearchValue((prev) => ({ ...prev, analysisTarget: event.target.value as AnalysisSelection }))
+								onValueChange={(value: AnalysisSelection) =>
+									setSearchValue((prev) => ({ ...prev, analysisTarget: value }))
 								}
-								className="w-full sm:w-44 h-12 rounded-lg border-2 border-primary/20 focus:border-primary bg-background hover:bg-muted/30 text-foreground font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-all cursor-pointer shadow-sm focus:shadow-[var(--shadow-hover)] px-3"
 								disabled={isLoading}
-								aria-label={t.analyze.serviceFilter.label}
 							>
-								{analysisOptions.map((option) => (
-									<option key={option.value} value={option.value}>
-										{option.label}
-									</option>
-								))}
-							</select>
-						<select
+								<SelectTrigger className="w-full sm:w-44 h-12 border-2 border-primary/20 focus:border-primary bg-background hover:bg-muted/30 transition-all shadow-sm focus:shadow-[var(--shadow-hover)]">
+									<SelectValue placeholder={t.analyze.serviceFilter.label} />
+								</SelectTrigger>
+								<SelectContent className="z-50 max-h-72 overflow-auto rounded-lg border-2 border-primary/20 bg-background shadow-[var(--shadow-hover)] backdrop-blur-sm">
+									{analysisOptions.map((option) => (
+										<SelectItem 
+											key={option.value} 
+											value={option.value}
+											className="px-4 py-3 transition-colors hover:bg-primary/10 focus:bg-primary/10 cursor-pointer"
+										>
+											{option.label}
+										</SelectItem>
+									))}
+								</SelectContent>
+							</Select>
+						<Select
 							value={searchValue.assetType}
-								onChange={(event) => {
-									const nextAssetType = event.target.value as "stock" | "crypto";
-									setSearchValue((prev) => ({ ...prev, assetType: nextAssetType }));
-								}}
-							className="w-full sm:w-40 h-12 rounded-lg border-2 border-primary/20 focus:border-primary bg-background hover:bg-muted/30 text-foreground font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-all cursor-pointer shadow-sm focus:shadow-[var(--shadow-hover)] px-3"
+							onValueChange={(value: "stock" | "crypto") => {
+								setSearchValue((prev) => ({ ...prev, assetType: value }));
+							}}
 							disabled={isLoading}
 						>
-							<option value="stock">{t.analyze.search_type_1}</option>
-							<option value="crypto">{t.analyze.search_type_2}</option>
-						</select>
+							<SelectTrigger className="w-full sm:w-40 h-12 border-2 border-primary/20 focus:border-primary bg-background hover:bg-muted/30 transition-all shadow-sm focus:shadow-[var(--shadow-hover)]">
+								<SelectValue />
+							</SelectTrigger>
+							<SelectContent className="z-50 max-h-72 overflow-auto rounded-lg border-2 border-primary/20 bg-background shadow-[var(--shadow-hover)] backdrop-blur-sm">
+								<SelectItem 
+									value="stock"
+									className="px-4 py-3 transition-colors hover:bg-primary/10 focus:bg-primary/10 cursor-pointer"
+								>
+									{t.analyze.search_type_1}
+								</SelectItem>
+								<SelectItem 
+									value="crypto"
+									className="px-4 py-3 transition-colors hover:bg-primary/10 focus:bg-primary/10 cursor-pointer"
+								>
+									{t.analyze.search_type_2}
+								</SelectItem>
+							</SelectContent>
+						</Select>
 						</div>
 						<Button
 							className="h-12 px-8 bg-gradient-to-r from-primary to-primary-glow hover:opacity-90 shadow-[var(--shadow-glow)] transition-all duration-300 font-semibold"
