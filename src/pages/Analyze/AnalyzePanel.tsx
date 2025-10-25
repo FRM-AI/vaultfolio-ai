@@ -99,6 +99,7 @@ export default function AnalyzePanel() {
 	const [showSuggestions, setShowSuggestions] = useState<boolean>(false);
 	const activeSearchIdRef = useRef(0);
 	const lastChartRequestRef = useRef<{ code: string; assetType: "stock" | "crypto" } | null>(null);
+	const lastSearchParamsRef = useRef<{ code: string; assetType: "stock" | "crypto" } | null>(null);
 
 	const normalizedQuery = useMemo(() => searchValue.stockCode.trim().toUpperCase(), [searchValue.stockCode]);
 
@@ -354,6 +355,7 @@ export default function AnalyzePanel() {
 	useEffect(() => {
 		if (!normalizedQuery) {
 			lastChartRequestRef.current = null;
+			lastSearchParamsRef.current = null;
 		}
 	}, [normalizedQuery]);
 
@@ -361,6 +363,10 @@ export default function AnalyzePanel() {
 		if (!normalizedQuery) {
 			return;
 		}
+
+		const isSameAsset =
+			lastSearchParamsRef.current?.code === normalizedQuery &&
+			lastSearchParamsRef.current.assetType === searchValue.assetType;
 
 		const requestId = activeSearchIdRef.current + 1;
 		activeSearchIdRef.current = requestId;
@@ -370,7 +376,9 @@ export default function AnalyzePanel() {
 		setShowSuggestions(false);
 		setIsLoading(true);
 		setProgress(0);
-		setSections(createEmptySections());
+		if (!isSameAsset) {
+			setSections(createEmptySections());
+		}
 
 		const lookBackDays = DEFAULT_NEWS_LOOKBACK_DAYS;
 		const shouldFetchChart =
@@ -399,7 +407,7 @@ export default function AnalyzePanel() {
 				key: SectionKey;
 				stream: AnalyzeStream;
 				payload: Record<string, unknown>;
-			}>;
+			}> = [];
 
 			if (searchValue.assetType === "crypto") {
 				streamingSteps = [
@@ -453,6 +461,16 @@ export default function AnalyzePanel() {
 				streamingSteps = streamingSteps.filter((step) => step.key === searchValue.analysisTarget);
 			}
 
+			if (isSameAsset && streamingSteps.length > 0) {
+				setSections((prev) => {
+					const next = { ...prev };
+					for (const step of streamingSteps) {
+						next[step.key] = "";
+					}
+					return next;
+				});
+			}
+
 			for (const step of streamingSteps) {
 				await handleStreaming(step.key, step.stream, step.payload);
 			}
@@ -468,6 +486,10 @@ export default function AnalyzePanel() {
 			}
 		} finally {
 			if (activeSearchIdRef.current === requestId) {
+				lastSearchParamsRef.current = {
+					code: normalizedQuery,
+					assetType: searchValue.assetType,
+				};
 				setIsLoading(false);
 			}
 		}
