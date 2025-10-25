@@ -23,6 +23,10 @@
     "searchPlaceholder_dates": "Enter number of days (e.g., 30, 60, 90...)",
     "search_type_1": "Stock",
     "search_type_2": "Crypto",
+    "serviceFilter": {
+      "label": "Analysis scope",
+      "all": "Run all analyses"
+    },
     "stockCode": "Code",
     "price": "Price",
     "change": "Change",

@@ -23,6 +23,10 @@
     "searchPlaceholder_dates": "Nhập số ngày (VD: 30, 60, 90...)",
     "search_type_1": "Cổ phiếu",
     "search_type_2": "Tiền ảo",
+    "serviceFilter": {
+      "label": "Phạm vi phân tích",
+      "all": "Chạy toàn bộ báo cáo"
+    },
     "stockCode": "Mã CP",
     "price": "Giá",
     "change": "Thay đổi",

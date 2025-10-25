@@ -43,6 +43,22 @@ type AnalyzeStream = (
 	init?: { signal?: AbortSignal }
 ) => AsyncGenerator<AnalyzeStreamEvent>;
 
+type AnalysisSelection = "all" | SectionKey;
+
+const STOCK_ANALYSIS_SEQUENCE: SectionKey[] = [
+	"proprietary_trading_analysis",
+	"intraday_analysis",
+	"shareholder_trading_analysis",
+	"foreign_trading_analysis",
+	"technical_analysis",
+	"news_analysis",
+];
+
+const CRYPTO_ANALYSIS_SEQUENCE: SectionKey[] = [
+	"technical_analysis",
+	"news_analysis",
+];
+
 const createEmptySections = (): SectionState => ({
 	technical_analysis: "",
 	news_analysis: "",
@@ -65,13 +81,14 @@ const markdownComponents = {
 };
 
 const MAX_SUGGESTIONS = 6;
+const DEFAULT_NEWS_LOOKBACK_DAYS = 30;
 
 export default function AnalyzePanel() {
 	const { t } = useLanguage();
-	const [searchValue, setSearchValue] = useState<{ stockCode: string; days: string; assetType: string }>({
+	const [searchValue, setSearchValue] = useState<{ stockCode: string; assetType: "stock" | "crypto"; analysisTarget: AnalysisSelection }>({
 		stockCode: "",
-		days: "",
 		assetType: "stock",
+		analysisTarget: "all",
 	});
 	const [status, setStatus] = useState<string>("");
 	const [progress, setProgress] = useState<number>(0);
@@ -81,6 +98,7 @@ export default function AnalyzePanel() {
 	const [isLoading, setIsLoading] = useState<boolean>(false);
 	const [showSuggestions, setShowSuggestions] = useState<boolean>(false);
 	const activeSearchIdRef = useRef(0);
+	const lastChartRequestRef = useRef<{ code: string; assetType: "stock" | "crypto" } | null>(null);
 
 	const normalizedQuery = useMemo(() => searchValue.stockCode.trim().toUpperCase(), [searchValue.stockCode]);
 
@@ -194,6 +212,55 @@ export default function AnalyzePanel() {
 		[t]
 	);
 
+	const [activeTab, setActiveTab] = useState<string>(tabsConfig[0]?.tabValue ?? "technical");
+
+	const availableTabs = useMemo(
+		() => tabsConfig.filter((tab) => (sections[tab.key] ?? "").trim().length > 0),
+		[sections, tabsConfig]
+	);
+
+	const analysisOptions = useMemo<Array<{ value: AnalysisSelection; label: string }>>(() => {
+		const sequence = searchValue.assetType === "crypto" ? CRYPTO_ANALYSIS_SEQUENCE : STOCK_ANALYSIS_SEQUENCE;
+		const tabLabelMap = new Map<SectionKey, string>();
+		for (const { key, label } of tabsConfig) {
+			tabLabelMap.set(key, label);
+		}
+
+		const options = sequence.map((key) => ({
+			value: key,
+			label: tabLabelMap.get(key) ?? sectionLabels[key] ?? key.replace(/_/g, " "),
+		}));
+
+		const allLabel = t.analyze.serviceFilter.all;
+		return [
+			{ value: "all" as const, label: allLabel },
+			...options,
+		];
+	}, [searchValue.assetType, sectionLabels, tabsConfig, t]);
+
+	useEffect(() => {
+		if (availableTabs.length === 0) {
+			const fallback = tabsConfig[0]?.tabValue;
+			if (fallback && activeTab !== fallback) {
+				setActiveTab(fallback);
+			}
+			return;
+		}
+
+		const isActiveAvailable = availableTabs.some((tab) => tab.tabValue === activeTab);
+		if (!isActiveAvailable) {
+			setActiveTab(availableTabs[0].tabValue);
+		}
+	}, [availableTabs, tabsConfig, activeTab]);
+
+	useEffect(() => {
+		if (analysisOptions.some((option) => option.value === searchValue.analysisTarget)) {
+			return;
+		}
+
+		setSearchValue((prev) => ({ ...prev, analysisTarget: "all" }));
+	}, [analysisOptions, searchValue.analysisTarget]);
+
 	// Helper to transform backend status messages to user-friendly Vietnamese
 	const transformStatus = useCallback((rawStatus: string): string => {
 		// Replace technical section keys with Vietnamese labels
@@ -284,6 +351,12 @@ export default function AnalyzePanel() {
 		[sectionLabels, t]
 	);
 
+	useEffect(() => {
+		if (!normalizedQuery) {
+			lastChartRequestRef.current = null;
+		}
+	}, [normalizedQuery]);
+
 	const handleSearch = useCallback(async () => {
 		if (!normalizedQuery) {
 			return;
@@ -298,16 +371,28 @@ export default function AnalyzePanel() {
 		setIsLoading(true);
 		setProgress(0);
 		setSections(createEmptySections());
-		setChartData(null);
 
-		const parsedDays = Number.parseInt(searchValue.days, 10);
-		const lookBackDays = Number.isNaN(parsedDays) || parsedDays <= 0 ? 30 : parsedDays;
-		setStatus(t.analyze.status.loadingChart);
+		const lookBackDays = DEFAULT_NEWS_LOOKBACK_DAYS;
+		const shouldFetchChart =
+			!lastChartRequestRef.current ||
+			lastChartRequestRef.current.code !== normalizedQuery ||
+			lastChartRequestRef.current.assetType !== searchValue.assetType;
+
+		if (shouldFetchChart) {
+			setChartData(null);
+			setStatus(t.analyze.status.loadingChart);
+		}
 
 		try {
-			const response = await AnalyzeService.chartData(normalizedQuery, searchValue.assetType);
-			if (response) {
-				setChartData(response);
+			if (shouldFetchChart) {
+				const response = await AnalyzeService.chartData(normalizedQuery, searchValue.assetType);
+				if (response) {
+					setChartData(response);
+					lastChartRequestRef.current = {
+						code: normalizedQuery,
+						assetType: searchValue.assetType,
+					};
+				}
 			}
 
 			let streamingSteps: Array<{
@@ -364,6 +449,10 @@ export default function AnalyzePanel() {
 				];
 			}
 
+			if (searchValue.analysisTarget !== "all") {
+				streamingSteps = streamingSteps.filter((step) => step.key === searchValue.analysisTarget);
+			}
+
 			for (const step of streamingSteps) {
 				await handleStreaming(step.key, step.stream, step.payload);
 			}
@@ -382,7 +471,7 @@ export default function AnalyzePanel() {
 				setIsLoading(false);
 			}
 		}
-	}, [handleStreaming, normalizedQuery, searchValue.assetType, searchValue.days, t]);
+	}, [handleStreaming, normalizedQuery, searchValue.assetType, searchValue.analysisTarget, t]);
 
 	useEffect(() => {
 		return () => {
@@ -434,9 +523,9 @@ export default function AnalyzePanel() {
 										disabled={isLoading}
 									/>
 
-								</div>
+									</div>
 
-								{showSuggestions && filteredSuggestions.length > 0 && (
+									{showSuggestions && filteredSuggestions.length > 0 && (
 									<div className="absolute z-50 mt-2 max-h-72 w-full overflow-auto rounded-lg border-2 border-primary/20 bg-background shadow-[var(--shadow-hover)] backdrop-blur-sm animate-scale-in">
 										<ul className="py-2">
 											{filteredSuggestions.map((stock, index) => (
@@ -457,22 +546,27 @@ export default function AnalyzePanel() {
 								)}
 							</div>
 
-							<Input
-								type="text"
-								placeholder={t.analyze.searchPlaceholder_dates}
-								className="w-full sm:w-28 h-12 border-2 focus:border-primary transition-colors text-center"
-								value={searchValue.days}
-								onChange={(event) =>
-									setSearchValue((prev) => ({ ...prev, days: event.target.value }))
-								}
-								onKeyDown={(event) => event.key === "Enter" && !isLoading && handleSearch()}
-								disabled={isLoading}
-							/>
+								<select
+									value={searchValue.analysisTarget}
+									onChange={(event) =>
+										setSearchValue((prev) => ({ ...prev, analysisTarget: event.target.value as AnalysisSelection }))
+									}
+									className="w-full sm:w-44 h-12 rounded-md border-2 border-input focus:border-primary bg-background text-foreground font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer"
+									disabled={isLoading}
+									aria-label={t.analyze.serviceFilter.label}
+								>
+									{analysisOptions.map((option) => (
+										<option key={option.value} value={option.value}>
+											{option.label}
+										</option>
+									))}
+								</select>
 							<select
 								value={searchValue.assetType}
-								onChange={(event) =>
-									setSearchValue((prev) => ({ ...prev, assetType: event.target.value }))
-								}
+									onChange={(event) => {
+										const nextAssetType = event.target.value as "stock" | "crypto";
+										setSearchValue((prev) => ({ ...prev, assetType: nextAssetType }));
+									}}
 								className="px-4 py-2 h-12 rounded-md border-2 border-input focus:border-primary bg-background text-foreground font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer"
 								disabled={isLoading}
 							>
@@ -523,15 +617,15 @@ export default function AnalyzePanel() {
 			)}
 
 			{/* Analysis Tabs Section */}
-			{tabsConfig.some((tab) => sections[tab.key]) && (
+			{availableTabs.length > 0 && (
 				<Card className="border-primary/20 shadow-[var(--shadow-card)] animate-fade-in">
 					<CardContent className="pt-6">
-						<Tabs defaultValue="technical" className="w-full">
+						<Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
 							<TabsList className="grid w-full grid-cols-3 md:grid-cols-6 gap-2 mb-8 h-auto p-2 bg-muted/50">
-								{tabsConfig.map(({ tabValue, icon: Icon, label }) => (
-									<TabsTrigger 
-										key={tabValue} 
-										value={tabValue} 
+								{availableTabs.map(({ tabValue, icon: Icon, label }) => (
+									<TabsTrigger
+										key={tabValue}
+										value={tabValue}
 										className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-primary-glow data-[state=active]:text-primary-foreground data-[state=active]:shadow-[var(--shadow-glow)] transition-all duration-300 py-3"
 									>
 										<Icon className="h-4 w-4" />
@@ -540,11 +634,11 @@ export default function AnalyzePanel() {
 								))}
 							</TabsList>
 
-							{tabsConfig.map(({ tabValue, key }) => (
+							{availableTabs.map(({ tabValue, key }) => (
 								<TabsContent key={tabValue} value={tabValue} className="mt-0 animate-fade-in">
 									<div className="prose prose-slate dark:prose-invert max-w-none prose-headings:text-foreground prose-p:text-foreground prose-strong:text-foreground prose-li:text-foreground prose-table:text-foreground prose-headings:font-bold prose-h1:text-3xl prose-h2:text-2xl prose-h3:text-xl prose-a:text-primary prose-a:no-underline hover:prose-a:underline">
 										<ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
-											{sections[key] || t.analyze.noContent}
+											{sections[key]}
 										</ReactMarkdown>
 									</div>
 								</TabsContent>
