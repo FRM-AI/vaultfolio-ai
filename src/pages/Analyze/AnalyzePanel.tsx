@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Search, BarChart3, Newspaper, FileText, ChevronDown } from "lucide-react";
+import { Search, BarChart3, Newspaper, FileText } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -58,6 +58,15 @@ const STOCK_ANALYSIS_SEQUENCE: SectionKey[] = [
 const CRYPTO_ANALYSIS_SEQUENCE: SectionKey[] = [
 	"technical_analysis",
 	"news_analysis",
+];
+
+const PRO_ANALYSIS_SECTIONS: ReadonlyArray<SectionKey> = [
+	"technical_analysis",
+	"news_analysis",
+	"proprietary_trading_analysis",
+	"foreign_trading_analysis",
+	"shareholder_trading_analysis",
+	"intraday_analysis",
 ];
 
 const createEmptySections = (): SectionState => ({
@@ -221,7 +230,7 @@ export default function AnalyzePanel() {
 		[sections, tabsConfig]
 	);
 
-	const analysisOptions = useMemo<Array<{ value: AnalysisSelection; label: string }>>(() => {
+	const analysisOptions = useMemo<Array<{ value: AnalysisSelection; label: string; isPro: boolean }>>(() => {
 		const sequence = searchValue.assetType === "crypto" ? CRYPTO_ANALYSIS_SEQUENCE : STOCK_ANALYSIS_SEQUENCE;
 		const tabLabelMap = new Map<SectionKey, string>();
 		for (const { key, label } of tabsConfig) {
@@ -231,11 +240,12 @@ export default function AnalyzePanel() {
 		const options = sequence.map((key) => ({
 			value: key,
 			label: tabLabelMap.get(key) ?? sectionLabels[key] ?? key.replace(/_/g, " "),
+			isPro: PRO_ANALYSIS_SECTIONS.includes(key),
 		}));
 
 		const allLabel = t.analyze.serviceFilter.all;
 		return [
-			{ value: "all" as const, label: allLabel },
+			{ value: "all" as const, label: allLabel, isPro: true },
 			...options,
 		];
 	}, [searchValue.assetType, sectionLabels, tabsConfig, t]);
@@ -581,12 +591,19 @@ export default function AnalyzePanel() {
 								</SelectTrigger>
 								<SelectContent className="z-50 max-h-72 overflow-auto rounded-lg border-2 border-primary/20 bg-background shadow-[var(--shadow-hover)] backdrop-blur-sm">
 									{analysisOptions.map((option) => (
-										<SelectItem 
-											key={option.value} 
+										<SelectItem
+											key={option.value}
 											value={option.value}
 											className="px-4 py-3 transition-colors hover:bg-primary/10 focus:bg-primary/10 cursor-pointer"
 										>
-											{option.label}
+											<div className="flex w-full items-center justify-between gap-2">
+												<span>{option.label}</span>
+												{option.isPro && (
+													<Badge variant="secondary" className="px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider">
+														Pro
+													</Badge>
+												)}
+											</div>
 										</SelectItem>
 									))}
 								</SelectContent>
