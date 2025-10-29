@@ -9,7 +9,8 @@
     "optimize": "Tối ưu đầu tư",
     "history": "Lịch sử",
     "settings": "Cài đặt",
-    "wallet": "Ví"
+    "wallet": "Ví",
+    "supportService": "Dịch vụ hỗ trợ"
   },
   "wallet": {
     "totalValue": "Số dư ví",
@@ -190,5 +191,27 @@
     "loginButton": "Đăng nhập",
     "noAccount": "Chưa có tài khoản?",
     "registerLink": "Đăng ký ngay"
+  },
+  "supportService": {
+    "title": "Dịch vụ API CafeF",
+    "description": "Dịch vụ API miễn phí để lấy dữ liệu thị trường chứng khoán Việt Nam",
+    "configTitle": "Cấu hình API",
+    "configDescription": "Chọn endpoint và cấu hình tham số",
+    "endpoint": "Endpoint",
+    "symbol": "Mã cổ phiếu",
+    "startDate": "Ngày bắt đầu",
+    "endDate": "Ngày kết thúc",
+    "date": "Ngày",
+    "pageIndex": "Trang",
+    "pageSize": "Kích thước trang",
+    "typeId": "Loại",
+    "fetch": "Lấy dữ liệu",
+    "loading": "Đang tải...",
+    "resultTitle": "Kết quả API",
+    "resultDescription": "Dữ liệu trả về từ API",
+    "success": "Thành công",
+    "dataLoaded": "Đã tải dữ liệu thành công",
+    "error": "Lỗi",
+    "fetchFailed": "Không thể lấy dữ liệu"
   }
 }

@@ -1,4 +1,4 @@
-import { BarChart3, LineChart, History, Settings, Wallet } from 'lucide-react';
+import { BarChart3, LineChart, History, Settings, Wallet, Database } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 import {
   Sidebar,
@@ -23,6 +23,7 @@ export function AppSidebar() {
     { title: t.nav.analyze, url: '/', icon: BarChart3 },
     { title: t.nav.optimize, url: '/optimize', icon: LineChart },
     // { title: t.nav.history, url: '/history', icon: History },
+    { title: t.nav.supportService, url: '/support-service', icon: Database },
     { title: t.nav.settings, url: '/settings', icon: Settings },
   ];
 

@@ -9,7 +9,8 @@
     "optimize": "Optimize",
     "history": "History",
     "settings": "Settings",
-    "wallet": "Wallet"
+    "wallet": "Wallet",
+    "supportService": "Support Service"
   },
   "wallet": {
     "totalValue": "Total Token",
@@ -190,5 +191,27 @@
     "loginButton": "Sign In",
     "noAccount": "Don't have an account?",
     "registerLink": "Register now"
+  },
+  "supportService": {
+    "title": "CafeF API Service",
+    "description": "Free API service to fetch Vietnamese stock market data",
+    "configTitle": "API Configuration",
+    "configDescription": "Select endpoint and configure parameters",
+    "endpoint": "Endpoint",
+    "symbol": "Stock Symbol",
+    "startDate": "Start Date",
+    "endDate": "End Date",
+    "date": "Date",
+    "pageIndex": "Page Index",
+    "pageSize": "Page Size",
+    "typeId": "Type ID",
+    "fetch": "Fetch Data",
+    "loading": "Loading...",
+    "resultTitle": "API Response",
+    "resultDescription": "Data returned from the API",
+    "success": "Success",
+    "dataLoaded": "Data loaded successfully",
+    "error": "Error",
+    "fetchFailed": "Failed to fetch data"
   }
 }

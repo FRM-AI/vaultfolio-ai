@@ -12,6 +12,7 @@ import Login from "./pages/auth/Login";
 import Optimize from "./pages/Optimize/Optimize";
 import History from "./pages/History";
 import Settings from "./pages/Settings";
+import SupportService from "./pages/SupportService";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -35,6 +36,7 @@ const App = () => (
                 {/* <Route path="/analyze" element={<Index autoFocusAnalyze />} /> */}
                 <Route path="/optimize" element={<Optimize />} />
                 {/* <Route path="/history" element={<History />} /> */}
+                <Route path="/support-service" element={<SupportService />} />
                 <Route path="/settings" element={<Settings />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
