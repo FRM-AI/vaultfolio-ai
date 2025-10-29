@@ -17,3 +17,18 @@ const GetCompanyProfile = (data: {ticker: string}) => apiClient.get(`${BASE_URL}
 const GetFinanceData = (data: {ticker: string}) => apiClient.get(`${BASE_URL}/finance-data`, { params: data });
 const GetGlobalIndices = (data: {ticker: string}) => apiClient.get(`${BASE_URL}/global-indices`, { params: data });
 
+export const CafeService = {
+  GetShareholder,
+  GetPriceHistory,
+  GetForeignTrading,
+  GetProprietaryTrading,
+  GetMatchPrice,
+  GetrealtimePrice,
+  GetCompanyInfo,
+  GetLeadership,
+  GetSubsidiaries,
+  GetFinancialReports,
+  GetCompanyProfile,
+  GetFinanceData,
+  GetGlobalIndices,
+};
