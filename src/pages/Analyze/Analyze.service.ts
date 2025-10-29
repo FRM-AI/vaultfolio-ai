@@ -1,6 +1,5 @@
 import { APIClient } from "@/lib/helper/api_helper";
 
-const BASE_URL_INSIGHTS = "/api/insights/stream";
 const BASE_URL_CHART = "/api/stock_data";
 const apiClient = new APIClient();
 
