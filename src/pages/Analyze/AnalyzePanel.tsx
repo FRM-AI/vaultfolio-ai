@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Search, BarChart3, Newspaper, FileText, Database } from "lucide-react";
+import { Search, BarChart3, Newspaper, FileText } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -13,7 +13,6 @@ import { AnalyzeService } from "./Analyze.service";
 import { StockChart } from "@/components/StockChart";
 import { STOCK_SUGGESTIONS } from "@/constants/stocks";
 import { CryptoSupportInfo } from "@/constants/crypto";
-import { CafeServicePanel } from "./CafeServicePanel";
 
 type SectionKey =
 	| "technical_analysis"
@@ -223,8 +222,6 @@ export default function AnalyzePanel() {
 		],
 		[t]
 	);
-
-	const [showCafeService, setShowCafeService] = useState(false);
 
 	const [activeTab, setActiveTab] = useState<string>(tabsConfig[0]?.tabValue ?? "technical");
 
@@ -709,27 +706,6 @@ export default function AnalyzePanel() {
 						</Tabs>
 					</CardContent>
 				</Card>
-			)}
-
-			{/* CafeF Service Toggle */}
-			<Card className="border-primary/20 shadow-[var(--shadow-card)] animate-fade-in">
-				<CardContent className="pt-6">
-					<Button
-						onClick={() => setShowCafeService(!showCafeService)}
-						variant="outline"
-						className="w-full h-14 text-lg font-semibold border-2 border-primary/30 hover:bg-primary/10 transition-all"
-					>
-						<Database className="h-5 w-5 mr-2" />
-						{showCafeService ? "Ẩn" : "Hiển thị"} CafeF API Service
-					</Button>
-				</CardContent>
-			</Card>
-
-			{/* CafeF Service Panel */}
-			{showCafeService && (
-				<div className="animate-fade-in">
-					<CafeServicePanel ticker={normalizedQuery} />
-				</div>
 			)}
 		</div>
 	);
