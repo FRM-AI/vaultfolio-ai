@@ -193,8 +193,8 @@
     "registerLink": "Đăng ký ngay"
   },
   "supportService": {
-  "title": "Dịch vụ dữ liệu CafeF",
-  "description": "Truy cập miễn phí các endpoint CafeF cho giá, dòng tiền và thông tin doanh nghiệp.",
+  "title": "Dịch vụ dữ liệu",
+  "description": "Truy cập miễn phí các endpoint cho giá, dòng tiền và thông tin doanh nghiệp.",
   "configTitle": "Cấu hình dịch vụ",
   "configDescription": "Chọn dịch vụ dữ liệu và tùy chỉnh tham số truy vấn.",
     "endpoint": "Endpoint",

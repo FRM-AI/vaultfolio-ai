@@ -194,7 +194,7 @@
   },
   "supportService": {
   "title": "Vietnam Stock Data Services",
-  "description": "Access free CafeF endpoints for quotes, trading flows, and company data.",
+  "description": "Access free endpoints for quotes, trading flows, and company data.",
   "configTitle": "Service Configuration",
   "configDescription": "Pick a data service and tailor the request parameters.",
     "endpoint": "Endpoint",
