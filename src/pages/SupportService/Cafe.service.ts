@@ -1,19 +1,34 @@
 import { APIClient } from "@/lib/helper/api_helper";
 
-const BASE_URL = "/api/cafe";
+const BASE_URL = "/api/cafef";
 const apiClient = new APIClient();
 
-export const GetShareholder = (data: {ticker: string} ) => apiClient.create(`${BASE_URL}/shareholder`, { params: data });
-export const GetPriceHistory = (data: {ticker: string}) => apiClient.create(`${BASE_URL}/price-history`, { params: data });
-export const GetForeignTrading = (data: {ticker: string}) => apiClient.create(`${BASE_URL}/foreign-trading`, { params: data });
-export const GetProprietaryTrading = (data: {ticker: string}) => apiClient.create(`${BASE_URL}/proprietary-trading`, { params: data });
-export const GetMatchPrice = (data: {ticker: string}) => apiClient.create(`${BASE_URL}/match-price`, { params: data });
-export const GetrealtimePrice = (data: {ticker: string}) => apiClient.create(`${BASE_URL}/realtime-price`, { params: data });
-export const GetCompanyInfo = (data: {ticker: string}) => apiClient.get(`${BASE_URL}/company-info`, { params: data });
-export const GetLeadership = (data: {ticker: string}) => apiClient.get(`${BASE_URL}/leadership`, { params: data });
-export const GetSubsidiaries = (data: {ticker: string}) => apiClient.get(`${BASE_URL}/subsidiaries`, { params: data });
-export const GetFinancialReports = (data: {ticker: string}) => apiClient.get(`${BASE_URL}/financial-reports`, { params: data });
-export const GetCompanyProfile = (data: {ticker: string}) => apiClient.get(`${BASE_URL}/company-profile`, { params: data });
-export const GetFinanceData = (data: {ticker: string}) => apiClient.get(`${BASE_URL}/finance-data`, { params: data });
-export const GetGlobalIndices = (data: {ticker: string}) => apiClient.get(`${BASE_URL}/global-indices`, { params: data });
+const GetShareholder = (data: {symbol: string} ) => apiClient.create(`${BASE_URL}/shareholder-data`, data);
+const GetPriceHistory = (data: {symbol: string}) => apiClient.create(`${BASE_URL}/price-history`, data);
+const GetForeignTrading = (data: {symbol: string}) => apiClient.create(`${BASE_URL}/foreign-trading`, data);
+const GetProprietaryTrading = (data: {symbol: string}) => apiClient.create(`${BASE_URL}/proprietary-trading`, data);
+const GetMatchPrice = (data: {symbol: string, date: string}) => apiClient.create(`${BASE_URL}/match-price`, data);
+const GetrealtimePrice = (data: {symbol: string}) => apiClient.get(`${BASE_URL}/realtime-price/${data.symbol}`);
+const GetCompanyInfo = (data: {symbol: string}) => apiClient.get(`${BASE_URL}/company-info/${data.symbol}`);
+const GetLeadership = (data: {symbol: string}) => apiClient.get(`${BASE_URL}/leadership/${data.symbol}`);
+const GetSubsidiaries = (data: {symbol: string}) => apiClient.get(`${BASE_URL}/subsidiaries/${data.symbol}`);
+const GetFinancialReports = (data: {symbol: string}) => apiClient.get(`${BASE_URL}/financial-reports/${data.symbol}`);
+const GetCompanyProfile = (data: {symbol: string}) => apiClient.get(`${BASE_URL}/company-profile/${data.symbol}`);
+const GetFinanceData = (data: {symbol: string}) => apiClient.get(`${BASE_URL}/finance-data/${data.symbol}`);
+const GetGlobalIndices = (data: {symbol?: string}) => apiClient.get(`${BASE_URL}/global-indices`, data);
 
+export const CafeService = {
+  GetShareholder,
+  GetPriceHistory,
+  GetForeignTrading,
+  GetProprietaryTrading,
+  GetMatchPrice,
+  GetrealtimePrice,
+  GetCompanyInfo,
+  GetLeadership,
+  GetSubsidiaries,
+  GetFinancialReports,
+  GetCompanyProfile,
+  GetFinanceData,
+  GetGlobalIndices
+};

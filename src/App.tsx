@@ -12,7 +12,7 @@ import Login from "./pages/auth/Login";
 import Optimize from "./pages/Optimize/Optimize";
 import History from "./pages/History";
 import Settings from "./pages/Settings";
-import SupportService from "./pages/SupportService";
+import SupportService from "./pages/SupportService/SupportService";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();

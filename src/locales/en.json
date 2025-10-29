@@ -193,10 +193,10 @@
     "registerLink": "Register now"
   },
   "supportService": {
-    "title": "CafeF API Service",
-    "description": "Free API service to fetch Vietnamese stock market data",
-    "configTitle": "API Configuration",
-    "configDescription": "Select endpoint and configure parameters",
+  "title": "Vietnam Stock Data Services",
+  "description": "Access free CafeF endpoints for quotes, trading flows, and company data.",
+  "configTitle": "Service Configuration",
+  "configDescription": "Pick a data service and tailor the request parameters.",
     "endpoint": "Endpoint",
     "symbol": "Stock Symbol",
     "startDate": "Start Date",
@@ -212,6 +212,35 @@
     "success": "Success",
     "dataLoaded": "Data loaded successfully",
     "error": "Error",
-    "fetchFailed": "Failed to fetch data"
+    "fetchFailed": "Failed to fetch data",
+    "resultSummary": {
+      "success": "Status",
+      "symbol": "Symbol",
+      "date": "Date",
+      "startDate": "Start Date",
+      "endDate": "End Date",
+      "pageIndex": "Page Index",
+      "pageSize": "Page Size",
+      "typeId": "Type ID"
+    },
+    "htmlNotice": "This endpoint returns an HTML attachment.",
+    "htmlDescription": "Use the button below to download and view the original content.",
+    "downloadHtml": "Download HTML file",
+    "previewNote": "Showing {{shown}} of {{total}} records.",
+    "services": {
+      "realtime-price": "Realtime Quotes",
+      "shareholder": "Insider & Major Shareholder Deals",
+      "price-history": "Price History",
+      "foreign-trading": "Foreign Trading Flow",
+      "proprietary-trading": "Proprietary Desk Activity",
+      "match-price": "Intraday Matching Prices",
+      "company-info": "Company Information (HTML)",
+      "leadership": "Leadership Directory (HTML)",
+      "subsidiaries": "Subsidiary List (HTML)",
+      "financial-reports": "Financial Reports (HTML)",
+      "company-profile": "Company Profile (HTML)",
+      "finance-data": "Financial Ratios",
+      "global-indices": "Global Indices"
+    }
   }
 }

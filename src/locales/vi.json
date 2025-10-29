@@ -193,10 +193,10 @@
     "registerLink": "Đăng ký ngay"
   },
   "supportService": {
-    "title": "Dịch vụ API CafeF",
-    "description": "Dịch vụ API miễn phí để lấy dữ liệu thị trường chứng khoán Việt Nam",
-    "configTitle": "Cấu hình API",
-    "configDescription": "Chọn endpoint và cấu hình tham số",
+  "title": "Dịch vụ dữ liệu CafeF",
+  "description": "Truy cập miễn phí các endpoint CafeF cho giá, dòng tiền và thông tin doanh nghiệp.",
+  "configTitle": "Cấu hình dịch vụ",
+  "configDescription": "Chọn dịch vụ dữ liệu và tùy chỉnh tham số truy vấn.",
     "endpoint": "Endpoint",
     "symbol": "Mã cổ phiếu",
     "startDate": "Ngày bắt đầu",
@@ -212,6 +212,35 @@
     "success": "Thành công",
     "dataLoaded": "Đã tải dữ liệu thành công",
     "error": "Lỗi",
-    "fetchFailed": "Không thể lấy dữ liệu"
+    "fetchFailed": "Không thể lấy dữ liệu",
+    "resultSummary": {
+      "success": "Trạng thái",
+      "symbol": "Mã cổ phiếu",
+      "date": "Ngày",
+      "startDate": "Ngày bắt đầu",
+      "endDate": "Ngày kết thúc",
+      "pageIndex": "Trang",
+      "pageSize": "Kích thước trang",
+      "typeId": "Loại"
+    },
+    "htmlNotice": "Endpoint này trả về tệp HTML.",
+    "htmlDescription": "Nhấn nút bên dưới để tải về và xem nội dung gốc.",
+    "downloadHtml": "Tải tệp HTML",
+    "previewNote": "Hiển thị {{shown}} trong tổng số {{total}} bản ghi.",
+    "services": {
+      "realtime-price": "Giá realtime",
+      "shareholder": "Giao dịch cổ đông lớn",
+      "price-history": "Lịch sử giá",
+      "foreign-trading": "Dòng tiền khối ngoại",
+      "proprietary-trading": "Giao dịch tự doanh",
+      "match-price": "Giá khớp trong ngày",
+      "company-info": "Thông tin doanh nghiệp (HTML)",
+      "leadership": "Ban lãnh đạo (HTML)",
+      "subsidiaries": "Danh sách công ty con (HTML)",
+      "financial-reports": "Báo cáo tài chính (HTML)",
+      "company-profile": "Hồ sơ doanh nghiệp (HTML)",
+      "finance-data": "Chỉ số tài chính",
+      "global-indices": "Chỉ số thế giới"
+    }
   }
 }
