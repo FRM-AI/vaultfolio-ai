@@ -7,6 +7,22 @@ const apiClient = new APIClient();
 const chartData = (ticker: string, asset_type: string) =>
   apiClient.create(BASE_URL_CHART, { symbol: ticker, asset_type });
 
+const getNews = (symbol: string, look_back_days: number, asset_type: string, pages?: number) => {
+  const payload: Record<string, unknown> = { symbol, look_back_days, asset_type };
+  if (typeof pages === "number") {
+    payload.pages = pages;
+  }
+  return apiClient.create("/api/news", payload);
+};
+
+const getNewsStream = (
+  data: { symbol: string; look_back_days: number; asset_type: string; pages?: number },
+  init?: { signal?: AbortSignal }
+) => apiClient.streamPost("/api/news", data, init);
+
+const getTechnicalSignals = (symbol: string, asset_type: string) =>
+  apiClient.create("/api/technical_signals", { symbol: symbol, asset_type });
+
 const technicalAnalysisStream = (
   data: { ticker: string; asset_type: string },
   init?: { signal?: AbortSignal }
@@ -46,6 +62,9 @@ const intradayMatchAnalysisStream = (
 
 export const AnalyzeService = {
   chartData,
+  getNews,
+  getNewsStream,
+  getTechnicalSignals,
   technicalAnalysisStream,
   newsAnalysisStream,
   proprietaryTradingAnalysisStream,

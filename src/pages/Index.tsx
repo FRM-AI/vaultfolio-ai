@@ -4,7 +4,7 @@ import { BarChart3, Target, History, TrendingUp, Sparkles } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/contexts/LanguageContext';
-import AnalyzePanel from '@/pages/Analyze/AnalyzePanel';
+import AnalyzePanel from '@/pages/Analyze/Index';
 
 interface IndexProps {
   autoFocusAnalyze?: boolean;

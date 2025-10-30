@@ -36,10 +36,14 @@
     "pe": "P/E",
     "button": {
       "search": "Search",
-      "loading": "Loading..."
+      "loading": "Loading...",
+      "analyze": "AI Analyze",
+      "analyzing": "Analyzing...",
+      "refresh": "Refresh"
     },
     "status": {
       "loadingChart": "Loading chart...",
+      "loadingData": "Loading data...",
       "analyzing": "Analyzing {{section}}...",
       "complete": "Completed",
       "error": "An error occurred during analysis."
@@ -60,6 +64,32 @@
       "shareholder_trading_analysis": "major shareholder trading",
       "intraday_analysis": "intraday trading"
     },
+    "cafefSections": {
+      "realtimePrice": "Realtime Price",
+      "priceHistory": "Price History",
+      "matchPrice": "Intraday Match Prices",
+      "news": "News",
+      "foreignTrading": "Foreign Trading",
+      "proprietaryTrading": "Proprietary Trading",
+      "shareholderTrading": "Major Shareholder Deals",
+      "technicalSignals": "Technical Signals",
+      "companyInfo": "Company Information",
+      "leadership": "Leadership",
+      "subsidiaries": "Subsidiaries",
+      "financialReports": "Financial Reports",
+      "financeData": "Financial Data"
+    },
+    "aiAnalyzeButtons": {
+      "technicalAnalysis": "Technical Analysis AI",
+      "newsAnalysis": "News Analysis AI",
+      "proprietaryAnalysis": "Proprietary Trading Analysis AI",
+      "foreignAnalysis": "Foreign Trading Analysis AI",
+      "shareholderAnalysis": "Shareholder Trading Analysis AI",
+      "matchPriceAnalysis": "Intraday Match Price Analysis AI"
+    },
+    "matchPriceDate": "Select Date",
+    "emptyState": "No data available for {{section}}",
+    "loadingData": "Loading data...",
     "noContent": "_No content yet._"
   },
   "chart": {

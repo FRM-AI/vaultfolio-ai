@@ -36,10 +36,14 @@
     "pe": "P/E",
     "button": {
       "search": "Tìm kiếm",
-      "loading": "Đang tải..."
+      "loading": "Đang tải...",
+      "analyze": "Phân tích AI",
+      "analyzing": "Đang phân tích...",
+      "refresh": "Làm mới"
     },
     "status": {
       "loadingChart": "Đang tải biểu đồ...",
+      "loadingData": "Đang tải dữ liệu...",
       "analyzing": "Đang phân tích {{section}}...",
       "complete": "Hoàn tất",
       "error": "Có lỗi xảy ra khi phân tích."
@@ -60,6 +64,32 @@
       "shareholder_trading_analysis": "giao dịch cổ đông lớn",
       "intraday_analysis": "phân tích trong ngày"
     },
+    "cafefSections": {
+      "realtimePrice": "Giá Realtime",
+      "priceHistory": "Lịch sử giá",
+      "matchPrice": "Giá khớp trong ngày",
+      "news": "Tin tức",
+      "foreignTrading": "Giao dịch khối ngoại",
+      "proprietaryTrading": "Giao dịch tự doanh",
+      "shareholderTrading": "Giao dịch cổ đông lớn",
+      "technicalSignals": "Tín hiệu kỹ thuật",
+      "companyInfo": "Thông tin doanh nghiệp",
+      "leadership": "Ban lãnh đạo",
+      "subsidiaries": "Công ty con",
+      "financialReports": "Báo cáo tài chính",
+      "financeData": "Dữ liệu tài chính"
+    },
+    "aiAnalyzeButtons": {
+      "technicalAnalysis": "Phân tích kỹ thuật AI",
+      "newsAnalysis": "Phân tích tin tức AI",
+      "proprietaryAnalysis": "Phân tích giao dịch tự doanh AI",
+      "foreignAnalysis": "Phân tích giao dịch nước ngoài AI",
+      "shareholderAnalysis": "Phân tích giao dịch cổ đông AI",
+      "matchPriceAnalysis": "Phân tích giá khớp lệnh trong ngày AI"
+    },
+    "matchPriceDate": "Chọn ngày",
+    "emptyState": "Không có dữ liệu cho {{section}}",
+    "loadingData": "Đang tải dữ liệu...",
     "noContent": "_Chưa có nội dung._"
   },
   "chart": {
