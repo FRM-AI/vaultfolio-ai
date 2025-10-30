@@ -24,24 +24,15 @@ export function SectionNav() {
   };
 
   return (
-    <div className="fixed left-4 top-1/2 -translate-y-1/2 z-50">
+    <div className="fixed bottom-6 right-6 z-50">
       <div
         className="relative"
         onMouseEnter={() => setIsOpen(true)}
         onMouseLeave={() => setIsOpen(false)}
       >
-        {/* Menu Button */}
-        <Button
-          size="icon"
-          className="h-12 w-12 rounded-full shadow-lg bg-primary hover:bg-primary/90 transition-all"
-          onClick={() => setIsOpen(!isOpen)}
-        >
-          {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-        </Button>
-
         {/* Navigation Menu */}
         {isOpen && (
-          <div className="absolute left-16 top-0 bg-card border-2 border-primary/20 rounded-lg shadow-xl p-2 min-w-[240px] animate-fade-in">
+          <div className="absolute bottom-16 right-0 bg-card border-2 border-primary/20 rounded-lg shadow-xl p-2 min-w-[240px] animate-fade-in">
             <div className="space-y-1">
               {sections.map((section) => {
                 const Icon = section.icon;
@@ -59,6 +50,15 @@ export function SectionNav() {
             </div>
           </div>
         )}
+        
+        {/* Menu Button */}
+        <Button
+          size="icon"
+          className="h-12 w-12 rounded-full shadow-lg bg-primary hover:bg-primary/90 transition-all"
+          onClick={() => setIsOpen(!isOpen)}
+        >
+          {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+        </Button>
       </div>
     </div>
   );

@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Loader2, RefreshCw, ExternalLink, Newspaper, ChevronDown, ChevronUp } from 'lucide-react';
+import { Loader2, RefreshCw, ExternalLink, Newspaper, ChevronDown, ChevronUp, TrendingUp, TrendingDown, Minus } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import {
@@ -100,12 +100,20 @@ export function NewsDataSection({
     return 'secondary'; // neutral/gray
   };
 
-  const getSentimentLabel = (sentiment: string) => {
-    if (!sentiment) return 'Neutral';
+  const getSentimentIcon = (sentiment: string) => {
+    if (!sentiment) return <Minus className="h-4 w-4" />;
     const s = sentiment.toLowerCase();
-    if (s.includes('positive') || s === 'bullish') return '📈 Positive';
-    if (s.includes('negative') || s === 'bearish') return '📉 Negative';
-    return '➖ Neutral';
+    if (s.includes('positive') || s === 'bullish') return <TrendingUp className="h-4 w-4" />;
+    if (s.includes('negative') || s === 'bearish') return <TrendingDown className="h-4 w-4" />;
+    return <Minus className="h-4 w-4" />;
+  };
+
+  const getSentimentLabel = (sentiment: string) => {
+    if (!sentiment) return 'Trung lập';
+    const s = sentiment.toLowerCase();
+    if (s.includes('positive') || s === 'bullish') return 'Tích cực';
+    if (s.includes('negative') || s === 'bearish') return 'Tiêu cực';
+    return 'Trung lập';
   };
 
   const formatDate = (dateStr: string) => {
@@ -169,9 +177,26 @@ export function NewsDataSection({
         ) : (
           <Collapsible open={isOpen} onOpenChange={setIsOpen}>
             <div className="flex items-center justify-between mb-4">
-              <p className="text-sm text-muted-foreground">
-                {newsItems!.length} news articles
-              </p>
+              <div className="flex items-center gap-4">
+                <p className="text-sm text-muted-foreground">
+                  {newsItems!.length} bài viết
+                </p>
+                {/* Sentiment Legend */}
+                <div className="flex items-center gap-3 text-xs">
+                  <div className="flex items-center gap-1 text-green-600">
+                    <TrendingUp className="h-3 w-3" />
+                    <span>Tích cực</span>
+                  </div>
+                  <div className="flex items-center gap-1 text-muted-foreground">
+                    <Minus className="h-3 w-3" />
+                    <span>Trung lập</span>
+                  </div>
+                  <div className="flex items-center gap-1 text-red-600">
+                    <TrendingDown className="h-3 w-3" />
+                    <span>Tiêu cực</span>
+                  </div>
+                </div>
+              </div>
               <CollapsibleTrigger asChild>
                 <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
                   {isOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
@@ -185,9 +210,9 @@ export function NewsDataSection({
                     <table className="w-full text-sm">
                       <thead className="bg-muted/60 sticky top-0">
                         <tr>
-                          <th className="px-3 py-2 text-left font-semibold">Title</th>
-                          <th className="px-3 py-2 text-left font-semibold whitespace-nowrap w-32">Date</th>
-                          <th className="px-3 py-2 text-center font-semibold whitespace-nowrap w-32">Sentiment</th>
+                          <th className="px-3 py-2 text-left font-semibold">Tiêu đề</th>
+                          <th className="px-3 py-2 text-left font-semibold whitespace-nowrap w-32">Ngày</th>
+                          <th className="px-3 py-2 text-center font-semibold whitespace-nowrap w-24">Xu hướng</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -240,10 +265,23 @@ export function NewsDataSection({
                               <td className="px-3 py-2 align-top whitespace-nowrap">
                                 <span className="text-xs text-muted-foreground">{formatDate(date)}</span>
                               </td>
-                              <td className="px-3 py-2 align-top text-center">
-                                <Badge variant={getSentimentColor(sentiment)} className="text-xs">
-                                  {getSentimentLabel(sentiment)}
-                                </Badge>
+                              <td className="px-3 py-2 align-top">
+                                <div className="flex items-center justify-center gap-1.5">
+                                  <Tooltip delayDuration={200}>
+                                    <TooltipTrigger asChild>
+                                      <div className={`
+                                        ${getSentimentColor(sentiment) === 'default' ? 'text-green-600' : ''}
+                                        ${getSentimentColor(sentiment) === 'destructive' ? 'text-red-600' : ''}
+                                        ${getSentimentColor(sentiment) === 'secondary' ? 'text-muted-foreground' : ''}
+                                      `}>
+                                        {getSentimentIcon(sentiment)}
+                                      </div>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                      <p className="text-xs">{getSentimentLabel(sentiment)}</p>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </div>
                               </td>
                             </tr>
                           );

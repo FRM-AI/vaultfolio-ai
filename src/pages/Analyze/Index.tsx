@@ -615,6 +615,9 @@ export default function Index() {
 
   return (
     <div className="space-y-8">
+      {/* Section Navigation */}
+      <SectionNav />
+      
       {/* Header Section */}
       <div className="text-center space-y-2 animate-fade-in">
         <h2 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-primary via-primary-glow to-accent bg-clip-text text-transparent">
@@ -722,7 +725,7 @@ export default function Index() {
       )}
 
       {/* Technical Signals Section */}
-      <div className="space-y-4 animate-fade-in">
+      <div id="technical-signals-section" className="space-y-4 animate-fade-in">
         <TechnicalSignalsSection
           data={technicalSignals}
           onAnalyze={handleTechnicalAnalysis}
@@ -782,7 +785,7 @@ export default function Index() {
       </div>
 
       {/* News Data Section */}
-      <div className="space-y-4 animate-fade-in">
+      <div id="news-section" className="space-y-4 animate-fade-in">
         <NewsDataSection
           title={t.analyze.cafefSections.news}
           data={newsData}
@@ -799,7 +802,7 @@ export default function Index() {
 
       {/* Proprietary Trading Section */}
       {(proprietaryTrading || isLoading) && (
-        <div className="space-y-4 animate-fade-in">
+        <div id="proprietary-section" className="space-y-4 animate-fade-in">
           <ProprietaryTradingDataSection
             title={t.analyze.cafefSections.proprietaryTrading}
             data={proprietaryTrading}
@@ -819,7 +822,7 @@ export default function Index() {
 
       {/* Foreign Trading Section */}
       {(foreignTrading || isLoading) && (
-        <div className="space-y-4 animate-fade-in">
+        <div id="foreign-section" className="space-y-4 animate-fade-in">
           <ForeignTradingDataSection
             title={t.analyze.cafefSections.foreignTrading}
             data={foreignTrading}
@@ -839,7 +842,7 @@ export default function Index() {
 
       {/* Shareholder Trading Section */}
       {(shareholderTrading || isLoading) && (
-        <div className="space-y-4 animate-fade-in">
+        <div id="shareholder-section" className="space-y-4 animate-fade-in">
           <ShareholderDataSection
             title={t.analyze.cafefSections.shareholderTrading}
             data={shareholderTrading}
@@ -857,6 +860,5 @@ export default function Index() {
         </div>
       )}
     </div>
-    </>
   );
 }
