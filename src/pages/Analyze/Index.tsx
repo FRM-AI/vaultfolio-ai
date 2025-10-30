@@ -16,6 +16,7 @@ import { ForeignTradingDataSection } from './ForeignTradingDataSection';
 import { ProprietaryTradingDataSection } from './ProprietaryTradingDataSection';
 import { RealtimePriceDataSection } from './RealtimePriceDataSection';
 import { AIAnalysisPanel } from './AIAnalysisPanel';
+import { SectionNav } from '@/components/SectionNav';
 import { STOCK_SUGGESTIONS } from '@/constants/stocks';
 
 const MAX_SUGGESTIONS = 6;
@@ -856,5 +857,6 @@ export default function Index() {
         </div>
       )}
     </div>
+    </>
   );
 }

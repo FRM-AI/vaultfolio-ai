@@ -1,7 +1,8 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Loader2, RefreshCw } from 'lucide-react';
+import { Loader2, RefreshCw, Users, ChevronDown, ChevronUp } from 'lucide-react';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import {
   Tooltip,
   TooltipContent,
@@ -30,6 +31,7 @@ export function ShareholderDataSection({
   onRefresh,
 }: ShareholderDataSectionProps) {
   const { t } = useLanguage();
+  const [isOpen, setIsOpen] = useState(true);
 
   const shareholderItems = useMemo(() => {
     if (!data) return null;
@@ -147,10 +149,13 @@ export function ShareholderDataSection({
   };
 
   return (
-    <Card className="border-2 border-primary/20 shadow-[var(--shadow-card)] animate-fade-in">
+    <Card id="shareholder-section" className="border-2 border-primary/20 shadow-[var(--shadow-card)] animate-fade-in">
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
-          <span>{title}</span>
+          <div className="flex items-center gap-2">
+            <Users className="h-5 w-5 text-primary" />
+            <span>{title}</span>
+          </div>
           <div className="flex items-center gap-2">
             {onRefresh && (
               <Button
@@ -188,11 +193,23 @@ export function ShareholderDataSection({
             {t.analyze.emptyState.replace('{{section}}', title)}
           </div>
         ) : (
-          <div className="rounded-lg border border-border overflow-hidden">
-            <TooltipProvider>
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead className="bg-muted/60">
+          <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+            <div className="flex items-center justify-between mb-4">
+              <p className="text-sm text-muted-foreground">
+                {shareholderItems!.length} records
+              </p>
+              <CollapsibleTrigger asChild>
+                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                  {isOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                </Button>
+              </CollapsibleTrigger>
+            </div>
+            <CollapsibleContent>
+              <div className="rounded-lg border border-border overflow-hidden">
+                <TooltipProvider>
+                  <div className="overflow-x-auto max-h-[400px] overflow-y-auto">
+                    <table className="w-full text-sm">
+                      <thead className="bg-muted/60 sticky top-0">
                     <tr>
                       <th className="px-3 py-2 text-left font-semibold">Người giao dịch</th>
                       <th className="px-3 py-2 text-right font-semibold whitespace-nowrap">KL Mua</th>
@@ -347,6 +364,8 @@ export function ShareholderDataSection({
               </p>
             )}
           </div>
+        </CollapsibleContent>
+      </Collapsible>
         )}
       </CardContent>
     </Card>

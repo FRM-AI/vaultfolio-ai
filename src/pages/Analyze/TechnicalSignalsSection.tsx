@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Loader2, RefreshCw, TrendingDown, TrendingUp, AlertTriangle, ShieldCheck, CircleDot, BarChart3 } from 'lucide-react';
+import { Loader2, RefreshCw, TrendingDown, TrendingUp, AlertTriangle, ShieldCheck, CircleDot, BarChart3, Activity } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import {
   Tooltip,
@@ -95,10 +95,13 @@ export function TechnicalSignalsSection({
   const isEmpty = signals.length === 0;
 
   return (
-    <Card className="border-2 border-primary/20 shadow-[var(--shadow-card)] animate-fade-in">
+    <Card id="technical-signals-section" className="border-2 border-primary/20 shadow-[var(--shadow-card)] animate-fade-in">
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
-          <span>{t.analyze.cafefSections.technicalSignals}</span>
+          <div className="flex items-center gap-2">
+            <Activity className="h-5 w-5 text-primary" />
+            <span>{t.analyze.cafefSections.technicalSignals}</span>
+          </div>
           <div className="flex items-center gap-2">
             {onRefresh && (
               <Button
