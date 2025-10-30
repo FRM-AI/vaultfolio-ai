@@ -10,6 +10,11 @@ import { CafeService } from '@/pages/SupportService/Cafe.service';
 import { StockChart } from '@/components/StockChart';
 import { CafefDataSection } from './CafefDataSection';
 import { TechnicalSignalsSection } from './TechnicalSignalsSection';
+import { NewsDataSection } from './NewsDataSection';
+import { ShareholderDataSection } from './ShareholderDataSection';
+import { ForeignTradingDataSection } from './ForeignTradingDataSection';
+import { ProprietaryTradingDataSection } from './ProprietaryTradingDataSection';
+import { RealtimePriceDataSection } from './RealtimePriceDataSection';
 import { AIAnalysisPanel } from './AIAnalysisPanel';
 import { STOCK_SUGGESTIONS } from '@/constants/stocks';
 
@@ -733,19 +738,11 @@ export default function Index() {
       </div>
 
       {/* Realtime Price Section */}
-      <CafefDataSection 
+      <RealtimePriceDataSection 
         title={t.analyze.cafefSections.realtimePrice} 
         data={realtimePrice}
         isLoading={isLoadingRealtimePrice}
         onRefresh={refreshRealtimePrice}
-      />
-
-      {/* Price History Section */}
-      <CafefDataSection 
-        title={t.analyze.cafefSections.priceHistory} 
-        data={priceHistory}
-        isLoading={isLoadingPriceHistory}
-        onRefresh={refreshPriceHistory}
       />
 
       {/* Match Price Section with Date Picker */}
@@ -785,7 +782,7 @@ export default function Index() {
 
       {/* News Data Section */}
       <div className="space-y-4 animate-fade-in">
-        <CafefDataSection
+        <NewsDataSection
           title={t.analyze.cafefSections.news}
           data={newsData}
           onAnalyze={handleNewsAnalysis}
@@ -802,7 +799,7 @@ export default function Index() {
       {/* Proprietary Trading Section */}
       {(proprietaryTrading || isLoading) && (
         <div className="space-y-4 animate-fade-in">
-          <CafefDataSection
+          <ProprietaryTradingDataSection
             title={t.analyze.cafefSections.proprietaryTrading}
             data={proprietaryTrading}
             onAnalyze={handleProprietaryAnalysis}
@@ -822,7 +819,7 @@ export default function Index() {
       {/* Foreign Trading Section */}
       {(foreignTrading || isLoading) && (
         <div className="space-y-4 animate-fade-in">
-          <CafefDataSection
+          <ForeignTradingDataSection
             title={t.analyze.cafefSections.foreignTrading}
             data={foreignTrading}
             onAnalyze={handleForeignAnalysis}
@@ -842,7 +839,7 @@ export default function Index() {
       {/* Shareholder Trading Section */}
       {(shareholderTrading || isLoading) && (
         <div className="space-y-4 animate-fade-in">
-          <CafefDataSection
+          <ShareholderDataSection
             title={t.analyze.cafefSections.shareholderTrading}
             data={shareholderTrading}
             onAnalyze={handleShareholderAnalysis}
