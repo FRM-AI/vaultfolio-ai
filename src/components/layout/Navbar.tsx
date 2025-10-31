@@ -1,7 +1,6 @@
 import { Bell, Moon, Sun, Globe } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { Button } from '@/components/ui/button';
-import { SidebarTrigger } from '@/components/ui/sidebar';
 import { useLanguage } from '@/contexts/LanguageContext';
 import {
   DropdownMenu,
@@ -17,11 +16,9 @@ export function Navbar() {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="flex h-16 items-center px-4 gap-4">
-        <SidebarTrigger className="ml-2" />
-        
         <div className="flex items-center gap-2">
-          <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center">
-            <span className="text-white font-bold text-sm">F</span>
+          <div className="h-8 w-8 rounded-lg flex items-center justify-center">
+            <img src="/logo.png" alt="FRM-AI Logo" className="h-full w-full object-contain" />
           </div>
           <div className="hidden md:block">
             <h1 className="text-lg font-bold text-foreground">{t.app.title}</h1>

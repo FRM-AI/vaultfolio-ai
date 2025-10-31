@@ -1,8 +1,10 @@
 import { useMemo, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Loader2, RefreshCw, Users, ChevronDown, ChevronUp } from 'lucide-react';
+import { Loader2, RefreshCw, Users, ChevronDown, ChevronUp, Info } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { ProBadge } from '@/components/ProBadge';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
   Tooltip,
   TooltipContent,
@@ -174,9 +176,10 @@ export function ShareholderDataSection({
                 onClick={onAnalyze}
                 disabled={isAnalyzing || isEmpty}
                 size="sm"
-                className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70"
+                className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 gap-2"
               >
                 {isAnalyzing ? t.analyze.button.analyzing : (analyzeButtonText || t.analyze.button.analyze)}
+                <ProBadge serviceType="shareholder_trading_analysis" showTooltip={false} />
               </Button>
             )}
           </div>
@@ -205,6 +208,14 @@ export function ShareholderDataSection({
               </CollapsibleTrigger>
             </div>
             <CollapsibleContent>
+              {/* User Tip */}
+              <Alert className="mb-4 border-primary/30 bg-primary/5">
+                <Info className="h-4 w-4 text-primary" />
+                <AlertDescription className="text-sm">
+                  <span className="font-semibold">💡 Mẹo:</span> Di chuột qua từng giao dịch để xem chi tiết cổ đông
+                </AlertDescription>
+              </Alert>
+
               <div className="rounded-lg border border-border overflow-hidden">
                 <TooltipProvider>
                   <div className="overflow-x-auto max-h-[400px] overflow-y-auto">

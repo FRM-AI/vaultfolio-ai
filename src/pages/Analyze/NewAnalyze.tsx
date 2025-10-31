@@ -15,6 +15,7 @@ import { ShareholderDataSection } from './Sections/ShareholderDataSection';
 import { ForeignTradingDataSection } from './Sections/ForeignTradingDataSection';
 import { ProprietaryTradingDataSection } from './Sections/ProprietaryTradingDataSection';
 import { RealtimePriceDataSection } from './Sections/RealtimePriceDataSection';
+import { MatchPriceDataSection } from './Sections/MatchPriceDataSection';
 import { AIAnalysisPanel } from './AIAnalysisPanel';
 import { SectionNav } from '@/components/SectionNav';
 import { STOCK_SUGGESTIONS } from '@/constants/stocks';
@@ -617,14 +618,8 @@ export default function Index() {
     <div className="space-y-8">
       {/* Section Navigation */}
       <SectionNav />
+
       
-      {/* Header Section */}
-      <div className="text-center space-y-2 animate-fade-in">
-        <h2 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-primary via-primary-glow to-accent bg-clip-text text-transparent">
-          {t.analyze.title}
-        </h2>
-        <p className="text-muted-foreground text-lg">{t.analyze.description}</p>
-      </div>
 
       {/* Search Section */}
       <Card className="border-primary/20 shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-hover)] transition-[box-shadow] duration-300 animate-fade-in">
@@ -763,7 +758,7 @@ export default function Index() {
                 max={new Date().toISOString().slice(0, 10)}
               />
             </div>
-            <CafefDataSection 
+            <MatchPriceDataSection 
               title={t.analyze.cafefSections.matchPrice} 
               data={matchPrice}
               isLoading={isLoadingMatchPrice}

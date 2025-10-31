@@ -9,6 +9,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarTrigger,
   useSidebar,
 } from '@/components/ui/sidebar';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -24,7 +25,6 @@ export function AppSidebar() {
   const items = [
     { title: t.nav.analyze, url: '/', icon: BarChart3 },
     { title: t.nav.optimize, url: '/optimize', icon: LineChart },
-    { title: t.nav.supportService, url: '/support-service', icon: Database },
     { title: t.nav.settings, url: '/settings', icon: Settings },
   ];
 
@@ -32,9 +32,12 @@ export function AppSidebar() {
     <Sidebar className={collapsed ? 'w-14' : 'w-64'} collapsible="icon">
       <SidebarContent className="flex flex-col h-full">
         <SidebarGroup>
-          <SidebarGroupLabel className="text-lg font-bold text-primary px-4">
-            {!collapsed && t.app.title}
-          </SidebarGroupLabel>
+          <div className={`flex items-center py-2 ${collapsed ? 'justify-center px-0' : 'justify-between px-4'}`}>
+            <SidebarGroupLabel className="text-lg font-bold text-primary">
+              {!collapsed && t.app.title}
+            </SidebarGroupLabel>
+            <SidebarTrigger />
+          </div>
           <SidebarGroupContent>
             <SidebarMenu>
               {items.map((item) => (

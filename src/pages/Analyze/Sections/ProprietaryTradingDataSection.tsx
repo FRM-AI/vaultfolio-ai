@@ -1,9 +1,10 @@
 import { useMemo, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Loader2, RefreshCw, TrendingUp, ChevronDown, ChevronUp } from 'lucide-react';
+import { Loader2, RefreshCw, TrendingUp, ChevronDown, ChevronUp, Info } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { ProBadge } from '@/components/ProBadge';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
   Tooltip,
   TooltipContent,
@@ -200,6 +201,14 @@ export function ProprietaryTradingDataSection({
               </CollapsibleTrigger>
             </div>
             <CollapsibleContent>
+              {/* User Tip */}
+              <Alert className="mb-4 border-primary/30 bg-primary/5">
+                <Info className="h-4 w-4 text-primary" />
+                <AlertDescription className="text-sm">
+                  <span className="font-semibold">💡 Mẹo:</span> Di chuột qua từng ngày để xem chi tiết giao dịch tự doanh
+                </AlertDescription>
+              </Alert>
+
               <div className="rounded-lg border border-border overflow-hidden">
                 <TooltipProvider>
                   <div className="overflow-x-auto max-h-[400px] overflow-y-auto">

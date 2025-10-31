@@ -1,10 +1,11 @@
 import { useMemo, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Loader2, RefreshCw, ExternalLink, Newspaper, ChevronDown, ChevronUp, TrendingUp, TrendingDown, Minus } from 'lucide-react';
+import { Loader2, RefreshCw, ExternalLink, Newspaper, ChevronDown, ChevronUp, TrendingUp, TrendingDown, Minus, Info } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { ProBadge } from '@/components/ProBadge';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
   Tooltip,
   TooltipContent,
@@ -206,6 +207,14 @@ export function NewsDataSection({
               </CollapsibleTrigger>
             </div>
             <CollapsibleContent>
+              {/* User Tip */}
+              <Alert className="mb-4 border-primary/30 bg-primary/5">
+                <Info className="h-4 w-4 text-primary" />
+                <AlertDescription className="text-sm">
+                  <span className="font-semibold">💡 Mẹo:</span> Di chuột qua tiêu đề để xem nội dung chi tiết tin tức
+                </AlertDescription>
+              </Alert>
+
               <div className="rounded-lg border border-border overflow-hidden">
                 <TooltipProvider>
                   <div className="overflow-x-auto max-h-[400px] overflow-y-auto">
