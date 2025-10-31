@@ -1,4 +1,4 @@
-import { BarChart3, LineChart, History, Settings, Wallet, Database } from 'lucide-react';
+import { BarChart3, LineChart, Settings, Database } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 import {
   Sidebar,
@@ -13,6 +13,8 @@ import {
 } from '@/components/ui/sidebar';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { WalletInfo } from '@/components/WalletInfo';
+import { HistoryList } from '@/components/HistoryList';
+import { Separator } from '@/components/ui/separator';
 
 export function AppSidebar() {
   const { state } = useSidebar();
@@ -22,14 +24,13 @@ export function AppSidebar() {
   const items = [
     { title: t.nav.analyze, url: '/', icon: BarChart3 },
     { title: t.nav.optimize, url: '/optimize', icon: LineChart },
-    // { title: t.nav.history, url: '/history', icon: History },
     { title: t.nav.supportService, url: '/support-service', icon: Database },
     { title: t.nav.settings, url: '/settings', icon: Settings },
   ];
 
   return (
     <Sidebar className={collapsed ? 'w-14' : 'w-64'} collapsible="icon">
-      <SidebarContent>
+      <SidebarContent className="flex flex-col h-full">
         <SidebarGroup>
           <SidebarGroupLabel className="text-lg font-bold text-primary px-4">
             {!collapsed && t.app.title}
@@ -59,8 +60,15 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
+        {!collapsed && <Separator className="my-2" />}
+
+        {/* History Section */}
+        <div className="flex-1 overflow-hidden flex flex-col">
+          <HistoryList collapsed={collapsed} />
+        </div>
+
         {!collapsed && (
-          <div className="mt-auto p-4">
+          <div className="mt-auto p-4 border-t">
             <WalletInfo />
           </div>
         )}

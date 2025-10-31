@@ -10,7 +10,16 @@
     "history": "Lịch sử",
     "settings": "Cài đặt",
     "wallet": "Ví",
-    "supportService": "Dịch vụ hỗ trợ"
+    "supportService": "Dịch vụ hỗ trợ",
+    "newAnalyze": "Phân tích mới",
+    "historyList": "Lịch sử phân tích",
+    "noHistory": "Chưa có lịch sử",
+    "saveAnalysisTitle": "Đã lưu phân tích",
+    "saveAnalysisMessage": "Chúng tôi đã lưu kết quả phân tích AI của bạn. Hệ thống lưu tối đa 10 phân tích cho mỗi loại, vui lòng tải xuống các phân tích quan trọng để lưu trữ.",
+    "today": "Hôm nay",
+    "yesterday": "Hôm qua",
+    "thisWeek": "Tuần này",
+    "older": "Cũ hơn"
   },
   "wallet": {
     "totalValue": "Số dư ví",
@@ -90,7 +99,11 @@
     "matchPriceDate": "Chọn ngày",
     "emptyState": "Không có dữ liệu cho {{section}}",
     "loadingData": "Đang tải dữ liệu...",
-    "noContent": "_Chưa có nội dung._"
+    "noContent": "_Chưa có nội dung._",
+    "history": {
+      "title": "Lịch sử phân tích",
+      "empty": "Chưa có lịch sử phân tích"
+    }
   },
   "chart": {
     "titlePrefix": "Biểu đồ",

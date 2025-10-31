@@ -10,7 +10,16 @@
     "history": "History",
     "settings": "Settings",
     "wallet": "Wallet",
-    "supportService": "Support Service"
+    "supportService": "Support Service",
+    "newAnalyze": "New Analyze",
+    "historyList": "Analysis History",
+    "noHistory": "No history yet",
+    "saveAnalysisTitle": "Analysis Saved",
+    "saveAnalysisMessage": "We've saved your AI analysis result. We keep up to 10 analyses per type, so please download important analyses to keep track.",
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "thisWeek": "This Week",
+    "older": "Older"
   },
   "wallet": {
     "totalValue": "Total Token",
@@ -90,7 +99,11 @@
     "matchPriceDate": "Select Date",
     "emptyState": "No data available for {{section}}",
     "loadingData": "Loading data...",
-    "noContent": "_No content yet._"
+    "noContent": "_No content yet._",
+    "history": {
+      "title": "Analysis History",
+      "empty": "No analysis history yet"
+    }
   },
   "chart": {
     "titlePrefix": "Chart",

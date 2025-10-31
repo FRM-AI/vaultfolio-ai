@@ -10,9 +10,8 @@ import AuthLayout from "@/components/layout/AuthLayout";
 import Index from "./pages/Index";
 import Login from "./pages/auth/Login";
 import Optimize from "./pages/Optimize/Optimize";
-import History from "./pages/History";
 import Settings from "./pages/Settings";
-import SupportService from "./pages/SupportService/SupportService";
+import AnalyzeDetail from "./pages/Analyze/AnalyzeDetail";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -33,10 +32,8 @@ const App = () => (
               {/* App routes with default layout */}
               <Route element={<DefaultLayout />}>
                 <Route path="/" element={<Index />} />
-                {/* <Route path="/analyze" element={<Index autoFocusAnalyze />} /> */}
+                <Route path="/analyze/:id" element={<AnalyzeDetail />} />
                 <Route path="/optimize" element={<Optimize />} />
-                {/* <Route path="/history" element={<History />} /> */}
-                <Route path="/support-service" element={<SupportService />} />
                 <Route path="/settings" element={<Settings />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
