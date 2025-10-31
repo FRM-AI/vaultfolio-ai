@@ -3,6 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { Loader2, RefreshCw } from 'lucide-react';
+import { ProBadge } from '@/components/ProBadge';
+import type { AnalysisServiceType } from '@/components/WalletInfo';
 
 interface CafefDataSectionProps {
   title: string;
@@ -12,6 +14,7 @@ interface CafefDataSectionProps {
   isAnalyzing?: boolean;
   isLoading?: boolean;
   onRefresh?: () => void;
+  serviceType?: AnalysisServiceType;
 }
 
 export function CafefDataSection({ 
@@ -21,7 +24,8 @@ export function CafefDataSection({
   analyzeButtonText,
   isAnalyzing = false,
   isLoading = false,
-  onRefresh
+  onRefresh,
+  serviceType = 'intraday_match_analysis' // default fallback
 }: CafefDataSectionProps) {
   const { t } = useLanguage();
 
@@ -150,9 +154,10 @@ export function CafefDataSection({
                 onClick={onAnalyze}
                 disabled={isAnalyzing || isEmpty}
                 size="sm"
-                className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70"
+                className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 gap-2"
               >
                 {isAnalyzing ? t.analyze.button.analyzing : (analyzeButtonText || t.analyze.button.analyze)}
+                <ProBadge serviceType={serviceType} showTooltip={false} />
               </Button>
             )}
           </div>

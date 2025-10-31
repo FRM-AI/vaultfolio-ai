@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Loader2, RefreshCw, TrendingUp, ChevronDown, ChevronUp } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { ProBadge } from '@/components/ProBadge';
 import {
   Tooltip,
   TooltipContent,
@@ -167,9 +168,10 @@ export function ProprietaryTradingDataSection({
                 onClick={onAnalyze}
                 disabled={isAnalyzing || isEmpty}
                 size="sm"
-                className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70"
+                className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 gap-2"
               >
                 {isAnalyzing ? t.analyze.button.analyzing : (analyzeButtonText || t.analyze.button.analyze)}
+                <ProBadge serviceType="proprietary_trading_analysis" showTooltip={false} />
               </Button>
             )}
           </div>

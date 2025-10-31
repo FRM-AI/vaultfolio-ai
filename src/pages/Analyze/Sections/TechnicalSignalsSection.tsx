@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Loader2, RefreshCw, TrendingDown, TrendingUp, AlertTriangle, ShieldCheck, CircleDot, BarChart3, Activity } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { ProBadge } from '@/components/ProBadge';
 import {
   Tooltip,
   TooltipContent,
@@ -120,9 +121,10 @@ export function TechnicalSignalsSection({
                 onClick={onAnalyze}
                 disabled={isAnalyzing || isEmpty}
                 size="sm"
-                className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70"
+                className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 gap-2"
               >
                 {isAnalyzing ? t.analyze.button.analyzing : (analyzeButtonText || t.analyze.button.analyze)}
+                <ProBadge serviceType="technical_analysis" showTooltip={false} />
               </Button>
             )}
           </div>

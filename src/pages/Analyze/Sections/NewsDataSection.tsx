@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Loader2, RefreshCw, ExternalLink, Newspaper, ChevronDown, ChevronUp, TrendingUp, TrendingDown, Minus } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { ProBadge } from '@/components/ProBadge';
 import {
   Tooltip,
   TooltipContent,
@@ -156,9 +157,10 @@ export function NewsDataSection({
                 onClick={onAnalyze}
                 disabled={isAnalyzing || isEmpty}
                 size="sm"
-                className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70"
+                className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 gap-2"
               >
                 {isAnalyzing ? t.analyze.button.analyzing : (analyzeButtonText || t.analyze.button.analyze)}
+                <ProBadge serviceType="news_analysis" showTooltip={false} />
               </Button>
             )}
           </div>
