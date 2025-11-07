@@ -223,7 +223,7 @@ export function MatchPriceDataSection({
                 </AlertDescription>
               </Alert>
 
-              {/* Aggregates Section */}
+              {/* Aggregates Section
               {aggregates && aggregates.length > 0 && (
                 <div className="mb-4">
                   <h4 className="text-sm font-semibold mb-3 flex items-center gap-2">
@@ -260,7 +260,7 @@ export function MatchPriceDataSection({
                     })}
                   </div>
                 </div>
-              )}
+              )} */}
 
               {/* Match Data Table */}
               <div className="rounded-lg border border-border overflow-hidden">
