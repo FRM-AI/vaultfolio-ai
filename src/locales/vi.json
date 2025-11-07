@@ -97,6 +97,10 @@
       "matchPriceAnalysis": "Phân tích giá khớp lệnh trong ngày AI"
     },
     "matchPriceDate": "Chọn ngày",
+    "buyedPrice": "Giá mua",
+    "buyedPricePlaceholder": "Nhập giá mua (tùy chọn)",
+    "clearPrice": "Xóa",
+    "technicalAdvice": "Khuyến nghị đầu tư",
     "emptyState": "Không có dữ liệu cho {{section}}",
     "loadingData": "Đang tải dữ liệu...",
     "noContent": "_Chưa có nội dung._",

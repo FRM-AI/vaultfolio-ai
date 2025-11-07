@@ -20,12 +20,12 @@ const getNewsStream = (
   init?: { signal?: AbortSignal }
 ) => apiClient.streamPost("/api/news", data, init);
 
-const getTechnicalSignals = (symbol: string, asset_type: string) =>
-  apiClient.create("/api/technical_signals", { symbol: symbol, asset_type });
+const getTechnicalSignals = (symbol: string, asset_type: string, buyed_price?: number) =>
+  apiClient.streamPost("/api/technical_signals", { symbol: symbol, asset_type, buyed_price });
 
 const technicalAnalysisStream = (
   data: { ticker: string; asset_type: string },
-  init?: { signal?: AbortSignal }
+  init?: { signal?: AbortSignal}
 ) => apiClient.streamPost("/api/technical-analysis/stream", data, init);
 
 const newsAnalysisStream = (

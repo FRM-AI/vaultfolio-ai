@@ -19,24 +19,10 @@ import { MatchPriceDataSection } from './Sections/MatchPriceDataSection';
 import { AIAnalysisPanel } from './AIAnalysisPanel';
 import { SectionNav } from '@/components/SectionNav';
 import { STOCK_SUGGESTIONS } from '@/constants/stocks';
+import { handleStreaming, type AnalyzeStream } from '@/lib/helper/handle_stream';
 
 const MAX_SUGGESTIONS = 6;
 const DEFAULT_NEWS_LOOKBACK_DAYS = 30;
-
-type AnalyzeStreamEvent = {
-  type: string;
-  message?: string;
-  progress?: number;
-  section?: string;
-  text?: string;
-  title?: string;
-  [key: string]: unknown;
-};
-
-type AnalyzeStream = (
-  params: Record<string, unknown>,
-  init?: { signal?: AbortSignal }
-) => AsyncGenerator<AnalyzeStreamEvent>;
 
 export default function Index() {
   const { t } = useLanguage();
@@ -59,6 +45,7 @@ export default function Index() {
 
   // AI analysis states
   const [technicalAnalysis, setTechnicalAnalysis] = useState('');
+  const [technicalAdvice, setTechnicalAdvice] = useState('');
   const [newsAnalysis, setNewsAnalysis] = useState('');
   const [proprietaryAnalysis, setProprietaryAnalysis] = useState('');
   const [foreignAnalysis, setForeignAnalysis] = useState('');
@@ -75,6 +62,13 @@ export default function Index() {
 
   // Date for match price analysis
   const [matchPriceDate, setMatchPriceDate] = useState(() => new Date().toISOString().slice(0, 10));
+
+  // Bought price for technical signals
+  const [buyedPrice, setBuyedPrice] = useState<number | undefined>(undefined);
+
+  // Streaming progress and status for technical signals
+  const [technicalSignalsProgress, setTechnicalSignalsProgress] = useState(0);
+  const [technicalSignalsStatus, setTechnicalSignalsStatus] = useState('');
 
   // Loading states for data fetching
   const [isLoadingTechnicalSignals, setIsLoadingTechnicalSignals] = useState(false);
@@ -173,9 +167,46 @@ export default function Index() {
         setIsLoadingNews(false);
       }
 
+      // Fetch technical signals using streaming
+      let finalTechnicalSignals = null;
+      try {
+        setTechnicalSignalsProgress(0);
+        setTechnicalSignalsStatus('Loading technical signals...');
+        setTechnicalAdvice(''); // Clear previous advice
+        
+        for await (const chunk of AnalyzeService.getTechnicalSignals(symbol, 'stock', buyedPrice)) {
+          // Update progress if available
+          if (chunk.type === 'status' && chunk.message) {
+            setTechnicalSignalsStatus(chunk.message);
+          }
+          if (chunk.type === 'status' && typeof chunk.progress === 'number') {
+            setTechnicalSignalsProgress(chunk.progress);
+          }
+          // Extract the metadata which contains the signals data
+          if (chunk.type === 'metadata' && chunk.data) {
+            finalTechnicalSignals = chunk.data;
+          }
+          // Handle advice content streaming
+          if (chunk.type === 'content' && chunk.section === 'advice' && chunk.text) {
+            setTechnicalAdvice((prev) => prev + chunk.text);
+          }
+          // Also handle final_data type if present
+          if (chunk.type === 'final_data' && chunk.data) {
+            finalTechnicalSignals = chunk.data;
+          }
+        }
+        setTechnicalSignals(finalTechnicalSignals);
+        setTechnicalSignalsProgress(100);
+      } catch (technicalError) {
+        console.error('Error fetching technical signals stream:', technicalError);
+        setTechnicalSignals(null);
+      } finally {
+        setIsLoadingTechnicalSignals(false);
+        setTechnicalSignalsStatus('');
+      }
+
       // Fetch all other Cafef APIs in parallel
       const results = await Promise.allSettled([
-        AnalyzeService.getTechnicalSignals(symbol, 'stock'),
         CafeService.GetrealtimePrice({ symbol }),
         CafeService.GetPriceHistory({ symbol, start_date: startDate, end_date: today, page_index: 1, page_size: 30 }),
         CafeService.GetMatchPrice({ symbol, date: matchPriceDate }),
@@ -185,7 +216,6 @@ export default function Index() {
       ]);
 
       const [
-        technicalSignalsRes,
         realtimePriceRes,
         priceHistoryRes,
         matchPriceRes,
@@ -193,9 +223,6 @@ export default function Index() {
         proprietaryTradingRes,
         shareholderTradingRes,
       ] = results;
-      
-      setTechnicalSignals(technicalSignalsRes.status === 'fulfilled' ? technicalSignalsRes.value : null);
-      setIsLoadingTechnicalSignals(false);
       
       setRealtimePrice(realtimePriceRes.status === 'fulfilled' ? realtimePriceRes.value : null);
       setIsLoadingRealtimePrice(false);
@@ -226,52 +253,7 @@ export default function Index() {
       setIsLoadingProprietaryTrading(false);
       setIsLoadingShareholderTrading(false);
     }
-  }, [matchPriceDate]);
-
-  const handleStreaming = useCallback(
-    async (stream: AnalyzeStream, payload: Record<string, unknown>, onContent: (text: string) => void) => {
-      const controller = new AbortController();
-      abortRef.current = controller;
-
-      try {
-        for await (const evt of stream(payload, { signal: controller.signal })) {
-          if (evt.type === 'status') {
-            const rawMessage = evt.message ?? '';
-            setStatus(rawMessage);
-            if (typeof evt.progress === 'number') {
-              setProgress(evt.progress);
-            }
-            continue;
-          }
-
-          if (evt.type === 'content') {
-            const text = typeof evt.text === 'string' ? evt.text : '';
-            onContent(text);
-            continue;
-          }
-
-          if (evt.type === 'complete') {
-            setProgress(evt.progress ?? 100);
-            setStatus(evt.message ?? t.analyze.status.complete);
-          }
-        }
-      } catch (error) {
-        const isAbortError =
-          error instanceof DOMException
-            ? error.name === 'AbortError'
-            : (error as { name?: string } | null)?.name === 'AbortError';
-
-        if (!isAbortError) {
-          throw error;
-        }
-      } finally {
-        if (abortRef.current === controller) {
-          abortRef.current = null;
-        }
-      }
-    },
-    [t]
-  );
+  }, [matchPriceDate, buyedPrice]);
 
   const handleSearch = useCallback(async () => {
     if (!normalizedQuery || !isAllowedSymbol) return;
@@ -294,6 +276,7 @@ export default function Index() {
     setShareholderTrading(null);
     setTechnicalSignals(null);
     setTechnicalAnalysis('');
+    setTechnicalAdvice('');
     setNewsAnalysis('');
     setProprietaryAnalysis('');
     setForeignAnalysis('');
@@ -324,138 +307,231 @@ export default function Index() {
   const handleTechnicalAnalysis = useCallback(async () => {
     if (!normalizedQuery || isAnalyzingTechnical) return;
 
+    const controller = new AbortController();
+    abortRef.current = controller;
+
     setIsAnalyzingTechnical(true);
     setTechnicalAnalysis('');
     setProgress(0);
 
     try {
-      await handleStreaming(
-        AnalyzeService.technicalAnalysisStream,
-        { ticker: normalizedQuery, asset_type: 'stock' },
-        (text) => setTechnicalAnalysis((prev) => prev + text)
-      );
+      await handleStreaming({
+        stream: AnalyzeService.technicalAnalysisStream,
+        payload: { ticker: normalizedQuery, asset_type: 'stock' },
+        onContent: (text) => setTechnicalAnalysis((prev) => prev + text),
+        onStatus: setStatus,
+        onProgress: setProgress,
+        onComplete: setStatus,
+        abortController: controller,
+        completeMessage: t.analyze.status.complete,
+      });
     } catch (error) {
       console.error('Error in technical analysis:', error);
     } finally {
       setIsAnalyzingTechnical(false);
+      if (abortRef.current === controller) {
+        abortRef.current = null;
+      }
     }
-  }, [normalizedQuery, isAnalyzingTechnical, handleStreaming]);
+  }, [normalizedQuery, isAnalyzingTechnical, t]);
 
   const handleNewsAnalysis = useCallback(async () => {
     if (!normalizedQuery || isAnalyzingNews) return;
+
+    const controller = new AbortController();
+    abortRef.current = controller;
 
     setIsAnalyzingNews(true);
     setNewsAnalysis('');
     setProgress(0);
 
     try {
-      await handleStreaming(
-        AnalyzeService.newsAnalysisStream,
-        { ticker: normalizedQuery, asset_type: 'stock', look_back_days: DEFAULT_NEWS_LOOKBACK_DAYS },
-        (text) => setNewsAnalysis((prev) => prev + text)
-      );
+      await handleStreaming({
+        stream: AnalyzeService.newsAnalysisStream,
+        payload: { ticker: normalizedQuery, asset_type: 'stock', look_back_days: DEFAULT_NEWS_LOOKBACK_DAYS },
+        onContent: (text) => setNewsAnalysis((prev) => prev + text),
+        onStatus: setStatus,
+        onProgress: setProgress,
+        onComplete: setStatus,
+        abortController: controller,
+        completeMessage: t.analyze.status.complete,
+      });
     } catch (error) {
       console.error('Error in news analysis:', error);
     } finally {
       setIsAnalyzingNews(false);
+      if (abortRef.current === controller) {
+        abortRef.current = null;
+      }
     }
-  }, [normalizedQuery, isAnalyzingNews, handleStreaming]);
+  }, [normalizedQuery, isAnalyzingNews, t]);
 
   const handleProprietaryAnalysis = useCallback(async () => {
     if (!normalizedQuery || isAnalyzingProprietary) return;
+
+    const controller = new AbortController();
+    abortRef.current = controller;
 
     setIsAnalyzingProprietary(true);
     setProprietaryAnalysis(''); 
     setProgress(0);
 
     try {
-      await handleStreaming(
-        AnalyzeService.proprietaryTradingAnalysisStream,
-        { ticker: normalizedQuery },
-        (text) => setProprietaryAnalysis((prev) => prev + text)
-      );
+      await handleStreaming({
+        stream: AnalyzeService.proprietaryTradingAnalysisStream,
+        payload: { ticker: normalizedQuery },
+        onContent: (text) => setProprietaryAnalysis((prev) => prev + text),
+        onStatus: setStatus,
+        onProgress: setProgress,
+        onComplete: setStatus,
+        abortController: controller,
+        completeMessage: t.analyze.status.complete,
+      });
     } catch (error) {
       console.error('Error in proprietary analysis:', error);
     } finally {
       setIsAnalyzingProprietary(false);
+      if (abortRef.current === controller) {
+        abortRef.current = null;
+      }
     }
-  }, [normalizedQuery, isAnalyzingProprietary, handleStreaming]);
+  }, [normalizedQuery, isAnalyzingProprietary, t]);
 
   const handleForeignAnalysis = useCallback(async () => {
     if (!normalizedQuery || isAnalyzingForeign) return;
+
+    const controller = new AbortController();
+    abortRef.current = controller;
 
     setIsAnalyzingForeign(true);
     setForeignAnalysis('');
     setProgress(0);
 
     try {
-      await handleStreaming(
-        AnalyzeService.foreignTradingAnalysisStream,
-        { ticker: normalizedQuery },
-        (text) => setForeignAnalysis((prev) => prev + text)
-      );
+      await handleStreaming({
+        stream: AnalyzeService.foreignTradingAnalysisStream,
+        payload: { ticker: normalizedQuery },
+        onContent: (text) => setForeignAnalysis((prev) => prev + text),
+        onStatus: setStatus,
+        onProgress: setProgress,
+        onComplete: setStatus,
+        abortController: controller,
+        completeMessage: t.analyze.status.complete,
+      });
     } catch (error) {
       console.error('Error in foreign analysis:', error);
     } finally {
       setIsAnalyzingForeign(false);
+      if (abortRef.current === controller) {
+        abortRef.current = null;
+      }
     }
-  }, [normalizedQuery, isAnalyzingForeign, handleStreaming]);
+  }, [normalizedQuery, isAnalyzingForeign, t]);
 
   const handleShareholderAnalysis = useCallback(async () => {
     if (!normalizedQuery || isAnalyzingShareholder) return;
+
+    const controller = new AbortController();
+    abortRef.current = controller;
 
     setIsAnalyzingShareholder(true);
     setShareholderAnalysis('');
     setProgress(0);
 
     try {
-      await handleStreaming(
-        AnalyzeService.shareholderTradingAnalysisStream,
-        { ticker: normalizedQuery },
-        (text) => setShareholderAnalysis((prev) => prev + text)
-      );
+      await handleStreaming({
+        stream: AnalyzeService.shareholderTradingAnalysisStream,
+        payload: { ticker: normalizedQuery },
+        onContent: (text) => setShareholderAnalysis((prev) => prev + text),
+        onStatus: setStatus,
+        onProgress: setProgress,
+        onComplete: setStatus,
+        abortController: controller,
+        completeMessage: t.analyze.status.complete,
+      });
     } catch (error) {
       console.error('Error in shareholder analysis:', error);
     } finally {
       setIsAnalyzingShareholder(false);
+      if (abortRef.current === controller) {
+        abortRef.current = null;
+      }
     }
-  }, [normalizedQuery, isAnalyzingShareholder, handleStreaming]);
+  }, [normalizedQuery, isAnalyzingShareholder, t]);
 
   const handleMatchPriceAnalysis = useCallback(async () => {
     if (!normalizedQuery || isAnalyzingMatchPrice) return;
+
+    const controller = new AbortController();
+    abortRef.current = controller;
 
     setIsAnalyzingMatchPrice(true);
     setMatchPriceAnalysis('');
     setProgress(0);
 
     try {
-      await handleStreaming(
-        AnalyzeService.intradayMatchAnalysisStream,
-        { ticker: normalizedQuery, date: matchPriceDate },
-        (text) => setMatchPriceAnalysis((prev) => prev + text)
-      );
+      await handleStreaming({
+        stream: AnalyzeService.intradayMatchAnalysisStream,
+        payload: { ticker: normalizedQuery, date: matchPriceDate },
+        onContent: (text) => setMatchPriceAnalysis((prev) => prev + text),
+        onStatus: setStatus,
+        onProgress: setProgress,
+        onComplete: setStatus,
+        abortController: controller,
+        completeMessage: t.analyze.status.complete,
+      });
     } catch (error) {
       console.error('Error in match price analysis:', error);
     } finally {
       setIsAnalyzingMatchPrice(false);
+      if (abortRef.current === controller) {
+        abortRef.current = null;
+      }
     }
-  }, [normalizedQuery, isAnalyzingMatchPrice, matchPriceDate, handleStreaming]);
+  }, [normalizedQuery, isAnalyzingMatchPrice, matchPriceDate, t]);
 
   // Individual refresh functions for each data section
   const refreshTechnicalSignals = useCallback(async () => {
     if (!normalizedQuery || isLoadingTechnicalSignals) return;
     
     setIsLoadingTechnicalSignals(true);
+    setTechnicalSignalsProgress(0);
+    setTechnicalSignalsStatus('Refreshing technical signals...');
+    setTechnicalAdvice(''); // Clear previous advice
+    
+    let finalTechnicalSignals = null;
     try {
-      const result = await AnalyzeService.getTechnicalSignals(normalizedQuery, 'stock');
-      setTechnicalSignals(result);
+      for await (const chunk of AnalyzeService.getTechnicalSignals(normalizedQuery, 'stock', buyedPrice)) {
+        // Update progress if available
+        if (chunk.type === 'status' && chunk.message) {
+          setTechnicalSignalsStatus(chunk.message);
+        }
+        if (chunk.type === 'status' && typeof chunk.progress === 'number') {
+          setTechnicalSignalsProgress(chunk.progress);
+        }
+        // Extract the metadata which contains the signals data
+        if (chunk.type === 'metadata' && chunk.data) {
+          finalTechnicalSignals = chunk.data;
+        }
+        // Handle advice content streaming
+        if (chunk.type === 'content' && chunk.section === 'advice' && chunk.text) {
+          setTechnicalAdvice((prev) => prev + chunk.text);
+        }
+        // Also handle final_data type if present
+        if (chunk.type === 'final_data' && chunk.data) {
+          finalTechnicalSignals = chunk.data;
+        }
+      }
+      setTechnicalSignals(finalTechnicalSignals);
+      setTechnicalSignalsProgress(100);
     } catch (error) {
       console.error('Error refreshing technical signals:', error);
       setTechnicalSignals(null);
     } finally {
       setIsLoadingTechnicalSignals(false);
+      setTechnicalSignalsStatus('');
     }
-  }, [normalizedQuery, isLoadingTechnicalSignals]);
+  }, [normalizedQuery, isLoadingTechnicalSignals, buyedPrice]);
 
   const refreshNews = useCallback(async () => {
     if (!normalizedQuery || isLoadingNews) return;
@@ -728,6 +804,11 @@ export default function Index() {
           isAnalyzing={isAnalyzingTechnical}
           isLoading={isLoadingTechnicalSignals}
           onRefresh={refreshTechnicalSignals}
+          buyedPrice={buyedPrice}
+          onBuyedPriceChange={setBuyedPrice}
+          streamProgress={technicalSignalsProgress}
+          streamStatus={technicalSignalsStatus}
+          adviceContent={technicalAdvice}
         />
 
         {/* Technical Analysis AI Result */}

@@ -1,9 +1,12 @@
 import { useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Loader2, RefreshCw, TrendingDown, TrendingUp, AlertTriangle, ShieldCheck, CircleDot, BarChart3, Activity } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { ProBadge } from '@/components/ProBadge';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import {
   Tooltip,
   TooltipContent,
@@ -18,6 +21,11 @@ interface TechnicalSignalsSectionProps {
   isAnalyzing?: boolean;
   isLoading?: boolean;
   onRefresh?: () => void;
+  buyedPrice?: number;
+  onBuyedPriceChange?: (price: number | undefined) => void;
+  streamProgress?: number;
+  streamStatus?: string;
+  adviceContent?: string;
 }
 
 interface Signal {
@@ -32,6 +40,11 @@ export function TechnicalSignalsSection({
   isAnalyzing = false,
   isLoading = false,
   onRefresh,
+  buyedPrice,
+  onBuyedPriceChange,
+  streamProgress,
+  streamStatus,
+  adviceContent,
 }: TechnicalSignalsSectionProps) {
   const { t } = useLanguage();
 
@@ -95,6 +108,44 @@ export function TechnicalSignalsSection({
 
   const isEmpty = signals.length === 0;
 
+  const markdownComponents = {
+    table: (props: any) => (
+      <div className="overflow-x-auto my-6 rounded-lg border-2 border-primary/20 shadow-[var(--shadow-card)] bg-card">
+        <table className="min-w-full divide-y divide-border border-collapse" {...props} />
+      </div>
+    ),
+    thead: (props: any) => <thead className="bg-gradient-to-r from-primary/10 to-accent/10" {...props} />,
+    tbody: (props: any) => <tbody className="divide-y divide-border bg-background" {...props} />,
+    th: (props: any) => (
+      <th 
+        className="px-4 py-3 text-left text-xs font-bold text-foreground uppercase tracking-wider border-b-2 border-primary/30" 
+        {...props} 
+      />
+    ),
+    td: (props: any) => (
+      <td
+        className="px-4 py-3 text-sm text-foreground whitespace-normal break-words"
+        {...props}
+      />
+    ),
+    tr: (props: any) => <tr className="hover:bg-muted/30 transition-colors even:bg-muted/10" {...props} />,
+    p: (props: any) => <p className="my-3 leading-relaxed" {...props} />,
+    ul: (props: any) => <ul className="my-4 ml-6 list-disc space-y-2" {...props} />,
+    ol: (props: any) => <ol className="my-4 ml-6 list-decimal space-y-2" {...props} />,
+    li: (props: any) => <li className="leading-relaxed" {...props} />,
+    h1: (props: any) => <h1 className="text-2xl font-bold mt-6 mb-4" {...props} />,
+    h2: (props: any) => <h2 className="text-xl font-bold mt-5 mb-3" {...props} />,
+    h3: (props: any) => <h3 className="text-lg font-bold mt-4 mb-2" {...props} />,
+    strong: (props: any) => <strong className="font-bold text-foreground" {...props} />,
+    em: (props: any) => <em className="italic text-foreground/90" {...props} />,
+    code: (props: any) => (
+      <code className="px-1.5 py-0.5 rounded bg-muted text-sm font-mono" {...props} />
+    ),
+    pre: (props: any) => (
+      <pre className="my-4 p-4 rounded-lg bg-muted overflow-x-auto" {...props} />
+    ),
+  };
+
   return (
     <Card id="technical-signals-section" className="border-2 border-primary/20 shadow-[var(--shadow-card)] animate-fade-in">
       <CardHeader>
@@ -129,44 +180,102 @@ export function TechnicalSignalsSection({
             )}
           </div>
         </CardTitle>
+        {onBuyedPriceChange && (
+          <div className="flex items-center gap-3 mt-4">
+            <label className="text-sm font-medium whitespace-nowrap">
+              {t.analyze.buyedPrice || 'Bought Price'}:
+            </label>
+            <Input
+              type="number"
+              step="0.01"
+              min="0"
+              placeholder={t.analyze.buyedPricePlaceholder || 'Enter bought price (optional)'}
+              value={buyedPrice || ''}
+              onChange={(e) => {
+                const value = e.target.value;
+                onBuyedPriceChange(value ? parseFloat(value) : undefined);
+              }}
+              className="w-auto max-w-xs"
+            />
+            {buyedPrice && (
+              <Button
+                onClick={() => onBuyedPriceChange(undefined)}
+                size="sm"
+                variant="ghost"
+                className="text-xs"
+              >
+                {t.analyze.clearPrice || 'Clear'}
+              </Button>
+            )}
+          </div>
+        )}
       </CardHeader>
       <CardContent>
         {isLoading ? (
-          <div className="flex items-center justify-center py-8 text-muted-foreground">
-            <Loader2 className="h-6 w-6 animate-spin mr-2" />
-            <span>{t.analyze.loadingData}</span>
+          <div className="space-y-3">
+            <div className="flex items-center justify-center py-8 text-muted-foreground">
+              <Loader2 className="h-6 w-6 animate-spin mr-2" />
+              <span>{streamStatus || t.analyze.loadingData}</span>
+            </div>
+            {streamProgress !== undefined && streamProgress > 0 && (
+              <div className="space-y-2">
+                <div className="relative h-2 bg-muted rounded-full overflow-hidden">
+                  <div
+                    className="absolute inset-0 bg-gradient-to-r from-primary via-primary-glow to-accent transition-all duration-300 ease-out"
+                    style={{ width: `${Math.min(streamProgress, 100)}%` }}
+                  />
+                </div>
+                <p className="text-xs text-center text-muted-foreground">{streamProgress}%</p>
+              </div>
+            )}
           </div>
         ) : isEmpty ? (
           <div className="text-center py-8 text-muted-foreground">
             {t.analyze.emptyState.replace('{{section}}', t.analyze.cafefSections.technicalSignals)}
           </div>
         ) : (
-          <TooltipProvider delayDuration={200}>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {signals.map((item, index) => (
-                <Tooltip key={index}>
-                  <TooltipTrigger asChild>
-                    <div
-                      className={`flex flex-col items-center justify-center p-4 rounded-lg border-2 cursor-help transition-all hover:scale-105 hover:shadow-md ${getSignalBadgeColor(
-                        item.signal
-                      )}`}
-                    >
-                      {getSignalIcon(item.signal)}
-                      <span className="text-xs font-medium text-center mt-2 line-clamp-2">
-                        {item.signal.split('(')[0].trim()}
-                      </span>
-                    </div>
-                  </TooltipTrigger>
-                  <TooltipContent className="max-w-md p-4" side="top">
-                    <div className="space-y-2">
-                      <p className="font-semibold text-sm">{item.signal}</p>
-                      <p className="text-xs text-muted-foreground leading-relaxed">{item.explanation}</p>
-                    </div>
-                  </TooltipContent>
-                </Tooltip>
-              ))}
-            </div>
-          </TooltipProvider>
+          <div className="space-y-6">
+            <TooltipProvider delayDuration={200}>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {signals.map((item, index) => (
+                  <Tooltip key={index}>
+                    <TooltipTrigger asChild>
+                      <div
+                        className={`flex flex-col items-center justify-center p-4 rounded-lg border-2 cursor-help transition-all hover:scale-105 hover:shadow-md ${getSignalBadgeColor(
+                          item.signal
+                        )}`}
+                      >
+                        {getSignalIcon(item.signal)}
+                        <span className="text-xs font-medium text-center mt-2 line-clamp-2">
+                          {item.signal.split('(')[0].trim()}
+                        </span>
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent className="max-w-md p-4" side="top">
+                      <div className="space-y-2">
+                        <p className="font-semibold text-sm">{item.signal}</p>
+                        <p className="text-xs text-muted-foreground leading-relaxed">{item.explanation}</p>
+                      </div>
+                    </TooltipContent>
+                  </Tooltip>
+                ))}
+              </div>
+            </TooltipProvider>
+
+            {adviceContent && (
+              <div className="mt-6 pt-6 border-t border-primary/20">
+                <div className="flex items-center gap-2 mb-4">
+                  <ShieldCheck className="h-5 w-5 text-primary" />
+                  <h3 className="text-lg font-semibold">{t.analyze.technicalAdvice || 'Khuyến nghị đầu tư'}</h3>
+                </div>
+                <div className="prose prose-slate dark:prose-invert max-w-none prose-headings:text-foreground prose-p:text-foreground prose-strong:text-foreground prose-li:text-foreground prose-table:text-foreground prose-headings:font-bold prose-h1:text-3xl prose-h2:text-2xl prose-h3:text-xl prose-a:text-primary prose-a:no-underline hover:prose-a:underline">
+                  <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
+                    {adviceContent}
+                  </ReactMarkdown>
+                </div>
+              </div>
+            )}
+          </div>
         )}
       </CardContent>
     </Card>

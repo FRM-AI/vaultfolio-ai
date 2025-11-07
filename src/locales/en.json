@@ -97,6 +97,10 @@
       "matchPriceAnalysis": "Intraday Match Price Analysis AI"
     },
     "matchPriceDate": "Select Date",
+    "buyedPrice": "Bought Price",
+    "buyedPricePlaceholder": "Enter bought price (optional)",
+    "clearPrice": "Clear",
+    "technicalAdvice": "Investment Advice",
     "emptyState": "No data available for {{section}}",
     "loadingData": "Loading data...",
     "noContent": "_No content yet._",

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Menu, X, Activity, Newspaper, TrendingUp, Users, Building2, Download, History, PlusCircle, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -31,6 +31,7 @@ export function SectionNav() {
   const [historyItems, setHistoryItems] = useState<InsightHistoryItem[]>([]);
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
   const [showSaveNotification, setShowSaveNotification] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
 
   const sections = [
     { id: 'technical-signals-section', label: t.analyze.cafefSections.technicalSignals, icon: Activity },
@@ -54,6 +55,23 @@ export function SectionNav() {
       loadHistory();
     }
   }, [showHistory]);
+
+  // Handle click outside to close menu
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isOpen]);
 
   const loadHistory = async () => {
     setIsLoadingHistory(true);
@@ -368,6 +386,7 @@ export function SectionNav() {
 
         {/* Navigation Menu */}
         <div
+          ref={menuRef}
           className="relative"
           onMouseEnter={() => setIsOpen(true)}
           onMouseLeave={() => setIsOpen(false)}
@@ -397,7 +416,10 @@ export function SectionNav() {
         <Button
           size="icon"
           className="h-12 w-12 rounded-full shadow-lg bg-primary hover:bg-primary/90 transition-all"
-          onClick={() => setIsOpen(!isOpen)}
+          onClick={(e) => {
+            e.stopPropagation();
+            setIsOpen(!isOpen);
+          }}
         >
           {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
         </Button>
