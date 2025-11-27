@@ -6,6 +6,15 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Lock, Mail } from 'lucide-react';
 import AuthService from './Auth.service';
 const Login = () => {
@@ -14,6 +23,7 @@ const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [acceptTerms, setAcceptTerms] = useState(false);
+  const [showRegisterAlert, setShowRegisterAlert] = useState(false);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -110,7 +120,7 @@ const Login = () => {
               <button
                 type="button"
                 className="text-primary hover:underline font-medium"
-                onClick={() => navigate('/register')}
+                onClick={() => setShowRegisterAlert(true)}
               >
                 {t.login.registerLink}
               </button>
@@ -118,6 +128,29 @@ const Login = () => {
           </CardFooter>
         </form>
       </Card>
+
+      <AlertDialog open={showRegisterAlert} onOpenChange={setShowRegisterAlert}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Đăng ký tài khoản</AlertDialogTitle>
+            <AlertDialogDescription className="text-base leading-relaxed space-y-3">
+              <p>
+                Hiện không cung cấp tính năng đăng ký tài khoản. Xin hãy liên hệ Zalo/Tele: <strong className="text-foreground">0972115606</strong> để lấy tài khoản.
+              </p>
+              <div className="bg-muted p-3 rounded-md border">
+                <p className="font-medium text-foreground mb-2">Hoặc sử dụng tài khoản test:</p>
+                <div className="space-y-1 text-sm">
+                  <p><strong className="text-foreground">Email:</strong> testuser15@example.com</p>
+                  <p><strong className="text-foreground">Password:</strong> sGnec6I3H7L6</p>
+                </div>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction>Đã hiểu</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
