@@ -160,6 +160,7 @@ export default function Index() {
           }
         }
         setNewsData(finalNewsData);
+        console.log(newsData);
       } catch (newsError) {
         console.error('Error fetching news stream:', newsError);
         setNewsData(null);
@@ -537,6 +538,7 @@ export default function Index() {
     if (!normalizedQuery || isLoadingNews) return;
     
     setIsLoadingNews(true);
+    console.log('Refreshing news...');
     let finalNewsData = null;
     try {
       for await (const chunk of AnalyzeService.getNewsStream({
@@ -549,6 +551,7 @@ export default function Index() {
         }
       }
       setNewsData(finalNewsData);
+      console.log(newsData);
     } catch (error) {
       console.error('Error refreshing news:', error);
       setNewsData(null);
